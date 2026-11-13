@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, Newsreader } from "next/font/google";
+import { Hanken_Grotesk, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { MissingConfig } from "@/components/MissingConfig";
 import { missingSupabaseVars } from "@/lib/supabase/env";
 import "./globals.css";
@@ -9,13 +9,20 @@ const hanken = Hanken_Grotesk({
   subsets: ["latin"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const instrument = Instrument_Serif({
+  variable: "--font-instrument",
   subsets: ["latin"],
+  weight: "400",
   style: ["normal", "italic"],
 });
 
-const THEME_COLOR = "#f6f2ea";
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+const THEME_COLOR = "#f5efff";
 
 export const metadata: Metadata = {
   title: { default: "Stretch", template: "%s · Stretch" },
@@ -44,9 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${hanken.variable} ${newsreader.variable} h-full antialiased`}
+      className={`${hanken.variable} ${instrument.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-dvh bg-vellum text-ink">
+      <body className="min-h-dvh bg-canvas text-ink">
         {missing.length > 0 ? <MissingConfig missing={missing} /> : children}
       </body>
     </html>
