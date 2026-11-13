@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/*
+ * Stretch theme tokens. Light theme only for now.
+ * Calm, reverent, highly readable. Designed at 390px wide.
+ */
+@theme {
+  /* Color */
+  --color-vellum: #f6f2ea; /* page background */
+  --color-surface: #fffdf8; /* cards, bars, dialogs */
+  --color-ink: #2a2622; /* primary text */
+  --color-muted: #6f675c; /* secondary text */
+  --color-pine: #2f4a3f; /* primary actions, active tab */
+  --color-pine-deep: #233930; /* pressed state */
+  --color-gold: #b8893b; /* quiet accent */
+  --color-hairline: #e4dccd; /* borders and dividers */
+  --color-danger: #a33a2b; /* destructive actions */
+
+  /* Type scale. Inputs never go below 16px, scripture never below 18px. */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.4;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-scripture: 1.25rem;
+  --text-scripture--line-height: 1.6;
+  --text-title: 1.875rem;
+  --text-title--line-height: 1.15;
+
+  /* Radii */
+  --radius-control: 0.75rem;
+  --radius-card: 1.125rem;
+
+  /* Spacing */
+  --spacing-tap: 2.75rem; /* 44px minimum tap target */
+  --spacing-tabbar: 4rem; /* tab bar height, before the home-bar inset */
+  --spacing-gutter: 1.25rem; /* page side padding */
+
+  --shadow-bar: 0 -1px 0 var(--color-hairline);
+  --shadow-dialog: 0 24px 60px -20px rgb(42 38 34 / 0.45);
+}
+
+@theme inline {
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+}
+
+html {
+  background: var(--color-vellum);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  overscroll-behavior-y: none;
+}
+
+/* iOS zooms the page when a focused field is under 16px. */
+input,
+select,
+textarea {
+  font-size: max(1rem, 16px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 2px;
+}
+
+/* Safe areas: iPhone notch at the top, home bar at the bottom. */
+@utility pt-safe {
+  padding-top: calc(env(safe-area-inset-top) + 1.5rem);
+}
+@utility pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1.5rem);
+}
+@utility pb-safe-tabbar {
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--spacing-tabbar) + 1.5rem);
+}
+@utility pb-safe-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility px-safe {
+  padding-left: max(var(--spacing-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--spacing-gutter), env(safe-area-inset-right));
+}
+
+dialog::backdrop {
+  background: rgb(42 38 34 / 0.45);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog[open] {
+    animation: dialog-in 160ms ease-out;
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
