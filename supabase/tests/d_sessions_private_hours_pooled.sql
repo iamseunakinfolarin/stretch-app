@@ -1,5 +1,6 @@
--- 5d. A member can't read another user's session rows, but get_prayer_hours returns the
---     correct group total. (Fixtures: owner 600 seconds, member 900 seconds.)
+-- Nobody can read another person's session rows, but get_prayer_hours returns the correct
+-- group total. A person's own stretches stay theirs after they leave a prayer.
+-- (Fixtures: owner 600 seconds, member 900 seconds.)
 select tests.act_as('member');
 select tests.expect_count($$select 1 from public.prayer_sessions where user_id = tests.uid('owner')$$, 0, 'member cannot read the owner''s session rows');
 select tests.expect_count($$select 1 from public.prayer_sessions where prayer_id = tests.id('prayer')$$, 1, 'member reads only their own session row');
@@ -21,4 +22,15 @@ select tests.expect_count($$select * from public.get_prayer_hours(array[tests.id
 select tests.act_as('outsider');
 select tests.expect_value($$select group_seconds from public.get_prayer_hours(array[tests.id('outsider_prayer')])$$, '0', 'a prayer with no stretches reports zero');
 select tests.expect_value($$select all_time_seconds from public.get_my_hours(now() - interval '1 day')$$, '0', 'outsider has no hours');
+
+-- After leaving: the member keeps their own stretches and hours, and loses the group view.
+select tests.act_as('member');
+select tests.expect_affected($$delete from public.prayer_members where prayer_id = tests.id('prayer') and user_id = tests.uid('member')$$, 1, 'member leaves the prayer');
+select tests.expect_count($$select 1 from public.prayer_sessions$$, 1, 'after leaving, the member still reads their own session row');
+select tests.expect_count($$select 1 from public.prayer_sessions where user_id <> tests.uid('member')$$, 0, 'and still nobody else''s');
+select tests.expect_value($$select all_time_seconds from public.get_my_hours(now() - interval '1 day')$$, '900', 'after leaving, their hours still count');
+select tests.expect_count($$select * from public.get_prayer_hours(array[tests.id('prayer')])$$, 0, 'after leaving, they no longer get the group total');
+select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now() - interval '10 minutes', now(), 300)$$, '42501', 'after leaving, they cannot log new stretches on the prayer');
+select tests.act_as('owner');
+select tests.expect_value($$select group_seconds from public.get_prayer_hours(array[tests.id('prayer')])$$, '1500', 'the group total keeps the hours of someone who left');
 select tests.reset();
