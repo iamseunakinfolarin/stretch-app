@@ -7,7 +7,9 @@
 //   npm run test:db               run every test
 //   npm run test:db -- e_join     run the tests whose file name contains "e_join"
 //   npm run test:db -- --print    print the bundled scripts instead of running them
-//                                 (for running against the hosted project through the Supabase MCP)
+//   npm run test:db -- --print-combined
+//                                 print one script that runs every selected test, for running
+//                                 against the hosted project through the Supabase MCP
 
 import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
@@ -38,6 +40,30 @@ const tests = readdirSync(here)
 
 const bundle = (file) =>
   ["begin;", read("_helpers.sql"), read("_fixtures.sql"), `-- ===== ${file} =====`, read(file), "rollback;", ""].join("\n");
+
+// One script for all the selected tests: fixtures are built once, and each test file runs
+// inside a savepoint that is rolled back before the next one. Used for the hosted project,
+// where the script is run through the Supabase MCP. The final rollback removes everything.
+const combined = () =>
+  [
+    "begin;",
+    read("_helpers.sql"),
+    read("_fixtures.sql"),
+    ...tests.flatMap((file) => [
+      `-- ===== ${file} =====`,
+      "savepoint test_file;",
+      read(file),
+      "rollback to savepoint test_file;",
+    ]),
+    "rollback;",
+    `select '${tests.length} test files ran with no failed check; everything was rolled back' as result;`,
+    "",
+  ].join("\n");
+
+if (args.includes("--print-combined")) {
+  process.stdout.write(combined());
+  process.exit(0);
+}
 
 if (print) {
   for (const file of tests) process.stdout.write(bundle(file));

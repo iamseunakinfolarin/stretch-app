@@ -76,7 +76,9 @@ npm run test:db
 
 ## Database
 
-The schema lives in `supabase/migrations/`. Every change is written there first, then that same SQL is applied to the project. `src/types/database.ts` is generated from the schema (`npm run gen:types`); do not edit it by hand.
+The schema lives in `supabase/migrations/`. Every change is written there first, then that same SQL is applied to the hosted Supabase project (named **Stretch**) through the Supabase MCP `apply_migration` tool. The file names carry the versions recorded on the hosted project.
+
+`src/types/database.ts` is generated from the hosted project's live schema with the Supabase MCP `generate_typescript_types` tool; do not edit it by hand. `npm run gen:types` produces the same types from the local database, which is useful while a migration is still in progress.
 
 Local database for development and tests (needs Docker):
 

@@ -24,11 +24,13 @@ The runner only connects to a local database and refuses any other host. The hos
 
 ## Run against the hosted project
 
-Print the bundled scripts and run each through the Supabase MCP `execute_sql` tool (or the dashboard SQL editor). Each script ends in `rollback`, so nothing is left behind.
+Print one combined script and run it through the Supabase MCP `execute_sql` tool (or the dashboard SQL editor). Fixtures are built once, each test file runs inside a savepoint, and the script ends in `rollback`, so nothing is left behind. A failed check stops the script with an error naming the check. If it reaches the end, the last line reports that every file ran.
 
 ```bash
-npm run test:db -- --print
+npm run test:db -- --print-combined
 ```
+
+The script is about 40 KB. It can be run in parts by passing file-name filters, for example `npm run test:db -- --print-combined a_ b_ c_`.
 
 ## What each file proves
 

@@ -40,7 +40,7 @@ select tests.expect_value($$select updated_at > '2001-01-01' from public.prayers
 
 -- Profiles: a signed-in user can set their own display name, within 1 to 40 characters.
 select tests.act_as('owner');
-select tests.expect_affected($$update public.profiles set display_name = 'Seun' where id = tests.uid('owner')$$, 1, 'a user can set their own display name');
+select tests.expect_affected($$update public.profiles set display_name = 'Grace' where id = tests.uid('owner')$$, 1, 'a user can set their own display name');
 select tests.expect_error($$update public.profiles set display_name = '' where id = tests.uid('owner')$$, '23514', 'an empty display name is rejected');
 select tests.expect_error(format($$update public.profiles set display_name = %L where id = tests.uid('owner')$$, repeat('x', 41)), '23514', 'a 41 character display name is rejected');
 
