@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
-import { DatabaseStatus } from "@/features/profile/DatabaseStatus";
+import { ProfileCard } from "@/features/profile/ProfileCard";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default function ProfilePage() {
   return (
     <>
-      <PageHeader eyebrow="Stretch" title="Profile">
-        Your name, your hours and your account will live here.
-      </PageHeader>
+      <PageHeader eyebrow="Stretch" title="Profile" />
       <div className="mt-8">
-        <DatabaseStatus />
+        <ProfileCard />
       </div>
     </>
   );
