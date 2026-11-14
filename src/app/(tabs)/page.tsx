@@ -10,10 +10,10 @@ export default function PrayPage() {
         Your prayers will wait here, ready to begin a stretch.
       </PageHeader>
       <figure className="mt-12 border-l border-accent pl-5">
-        <blockquote className="font-serif text-scripture text-ink">
+        <blockquote className="text-scripture font-medium text-ink">
           Men ought always to pray, and not to faint.
         </blockquote>
-        <figcaption className="label-mono mt-4 text-muted">Luke 18:1 · KJV</figcaption>
+        <figcaption className="eyebrow mt-4 text-muted">Luke 18:1 · KJV</figcaption>
       </figure>
     </>
   );

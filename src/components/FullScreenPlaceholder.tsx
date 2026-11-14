@@ -12,7 +12,7 @@ export function FullScreenPlaceholder({ title, children }: { title: string; chil
         Back
       </Link>
       <ProfileGate>
-        <h1 className="mt-4 font-serif text-title text-ink">{title}</h1>
+        <h1 className="mt-4 text-title font-bold text-forest">{title}</h1>
         <p className="mt-3 text-muted">{children}</p>
       </ProfileGate>
     </main>

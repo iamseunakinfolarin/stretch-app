@@ -18,7 +18,7 @@ export function TextField({ label, error, hint, className = "", ...rest }: TextF
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="label-mono block text-muted">
+      <label htmlFor={id} className="eyebrow block text-muted">
         {label}
       </label>
       <input

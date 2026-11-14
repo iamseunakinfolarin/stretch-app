@@ -2,39 +2,43 @@
 
 /*
  * Stretch theme tokens. Light theme only for now.
- * Soft lavender, deep aubergine ink, violet accent. A fine serif for titles and scripture,
- * a grotesk for reading, a mono for small labels. Designed at 390px wide.
+ * Soft sage, forest green and deep blue: quiet, natural, unhurried. One friendly sans throughout.
+ * Designed at 390px wide; on wide screens the app sits in a centered phone-width column.
  */
 @theme {
   /* Color */
-  --color-canvas: #f5efff; /* page background */
-  --color-surface: #fdfbff; /* cards, bars, dialogs, fields */
-  --color-ink: #2a1647; /* primary text */
-  --color-muted: #6a5a82; /* secondary text */
-  --color-primary: #7c3aed; /* buttons, active tab, links: white text stays readable on it */
-  --color-primary-deep: #581c87; /* pressed state */
-  --color-accent: #9047ff; /* decorative highlights only, never small text */
-  --color-wash: #ebe0ff; /* quiet fills: selected rows, icon backgrounds */
-  --color-hairline: #e2d6f5; /* borders and dividers */
+  --color-surround: #d3dad5; /* outside the app column, on wide screens */
+  --color-canvas: #e3e8e4; /* app background */
+  --color-surface: #fbfcfb; /* cards, bars, dialogs, fields */
+  --color-ink: #16291d; /* body text */
+  --color-forest: #1f4d30; /* headings */
+  --color-muted: #4f6257; /* secondary text */
+  --color-primary: #1a3e6f; /* links, active tab, focus */
+  --color-primary-deep: #122c50; /* pressed state */
+  --color-grad-from: #2f6b45; /* main buttons run from forest ... */
+  --color-grad-to: #2f6fa8; /* ... to blue */
+  --color-accent: #60b4e7; /* decorative highlights only, never small text */
+  --color-wash: #d6e0da; /* quiet fills: chips, selected rows */
+  --color-hairline: #c9d4cd; /* borders and dividers */
   --color-danger: #b3261e; /* destructive actions and errors */
 
   /* Type scale. Inputs never go below 16px, scripture never below 18px. */
-  --text-label: 0.6875rem;
+  --text-label: 0.75rem;
   --text-label--line-height: 1.3;
-  --text-caption: 0.8125rem;
+  --text-caption: 0.875rem;
   --text-caption--line-height: 1.45;
   --text-body: 1rem;
-  --text-body--line-height: 1.55;
-  --text-scripture: 1.5rem;
-  --text-scripture--line-height: 1.4;
-  --text-title: 2.5rem;
-  --text-title--line-height: 1.05;
-  --text-display: 3.5rem;
-  --text-display--line-height: 1;
+  --text-body--line-height: 1.6;
+  --text-scripture: 1.25rem;
+  --text-scripture--line-height: 1.55;
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.3;
+  --text-title: 1.875rem;
+  --text-title--line-height: 1.2;
 
   /* Radii */
-  --radius-control: 0.875rem;
-  --radius-card: 1.25rem;
+  --radius-control: 1rem;
+  --radius-card: 1.5rem;
 
   /* Spacing */
   --spacing-tap: 2.75rem; /* 44px minimum tap target */
@@ -42,17 +46,16 @@
   --spacing-tabbar: 4rem; /* tab bar height, before the home-bar inset */
   --spacing-gutter: 1.25rem; /* page side padding */
 
-  --shadow-dialog: 0 24px 60px -20px rgb(42 22 71 / 0.45);
+  --shadow-card: 0 1px 2px rgb(22 41 29 / 0.06), 0 8px 24px -16px rgb(22 41 29 / 0.25);
+  --shadow-dialog: 0 24px 60px -20px rgb(22 41 29 / 0.5);
 }
 
 @theme inline {
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
-  background: var(--color-canvas);
+  background: var(--color-surround);
   color: var(--color-ink);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -77,14 +80,18 @@ textarea {
   outline-offset: 2px;
 }
 
-/* The small uppercase mono label used for eyebrows, field labels and tab names. */
-@utility label-mono {
-  font-family: var(--font-mono);
+/* The small uppercase label used above titles and fields. */
+@utility eyebrow {
   font-size: var(--text-label);
   line-height: var(--text-label--line-height);
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* The forest-to-blue fill of main buttons. */
+@utility bg-brand {
+  background-image: linear-gradient(100deg, var(--color-grad-from), var(--color-grad-to));
 }
 
 /* Safe areas: iPhone notch at the top, home bar at the bottom. */
@@ -106,7 +113,7 @@ textarea {
 }
 
 dialog::backdrop {
-  background: rgb(42 22 71 / 0.45);
+  background: rgb(22 41 29 / 0.5);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -118,5 +125,15 @@ dialog::backdrop {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
   }
 }

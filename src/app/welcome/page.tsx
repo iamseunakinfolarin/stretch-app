@@ -20,8 +20,8 @@ async function Onboarding() {
 export default function WelcomePage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-safe pt-safe pb-safe">
-      <p className="label-mono text-primary">Welcome to Stretch</p>
-      <h1 className="mt-2 font-serif text-title text-ink">What should we call you?</h1>
+      <p className="eyebrow text-primary">Welcome to Stretch</p>
+      <h1 className="mt-2 text-title font-bold text-forest">What should we call you?</h1>
       <p className="mt-3 mb-8 text-muted">One small thing before you begin.</p>
       <Suspense fallback={null}>
         <Onboarding />
