@@ -21,6 +21,9 @@ Mobile-first prayer PWA. Next.js App Router, TypeScript strict, Tailwind, Supaba
   and falls back to src/app/error.tsx. A prayer that is missing or not yours shows not-found.
 - Next keeps the previous screen in the document, hidden. In Playwright, prefer role locators,
   which ignore hidden content, over getByText.
+- Stretches: time comes only from stored timestamps (src/features/stretch/clock.ts), never a counter.
+  A running stretch and any unsaved finished one live in localStorage; the only write is
+  complete_session in src/features/stretch/mutations.ts, with the id chosen at the start.
 - Screens inside the app are wrapped in ProfileGate (signed in and named). Read the signed-in
   person with useProfile() in client components or getCurrentProfile() on the server.
 - Phone first: design at 390px. Tap targets >= 44px, inputs >= 16px, scripture >= 18px,

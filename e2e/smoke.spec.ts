@@ -52,7 +52,7 @@ test("the tab bar is fixed to the bottom and every tab is at least 44px tall", a
 test("prayer and stretch screens are full screen, without the tab bar", async ({ page }) => {
   for (const [path, title] of [
     ["/prayers/new", "New prayer"],
-    ["/stretch/example-id", "Stretch"],
+    ["/stretch/4f1c8f0e-0000-4000-8000-000000000999", "We couldn't find that"],
   ] as const) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();

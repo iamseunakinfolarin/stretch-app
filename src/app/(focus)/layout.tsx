@@ -1,4 +1,5 @@
 import { DetailSkeleton } from "@/features/prayers/Skeletons";
+import { PendingStretchSync } from "@/features/stretch/PendingStretchSync";
 import { ProfileGate } from "@/features/profile/ProfileGate";
 
 // These screens read the session and may redirect, so they render at request time.
@@ -9,7 +10,10 @@ export const instant = false;
 export default function FocusLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-safe pt-safe pb-safe">
-      <ProfileGate fallback={<DetailSkeleton />}>{children}</ProfileGate>
+      <ProfileGate fallback={<DetailSkeleton />}>
+        <PendingStretchSync />
+        {children}
+      </ProfileGate>
     </main>
   );
 }
