@@ -47,6 +47,8 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `i_create_prayer.sql` | Creating a prayer creates the owner membership, and the creator can read the new prayer straight away |
 | `j_delete_my_account.sql` | `delete_my_account` removes only the caller's own data and the prayers they own |
 | `k_structure_and_grants.sql` | Eight tables with RLS on, the seven app functions, the profile trigger, the indexes, and exactly which functions and tables each role may use |
+| `l_prayers_crud.sql` | A person can create, read, update and delete only their own prayers; points and scriptures follow their prayer's access; deleting a prayer removes them; the plan's rules hold |
+| `m_save_prayer.sql` | `save_prayer` saves a prayer with its points and scriptures all or nothing; a retry changes nothing; order is kept; limits of 20 and 10 hold; only the owner can save; another prayer's point cannot be taken over |
 
 ## Error codes the app can rely on
 
@@ -57,6 +59,7 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `42501` | Not allowed (not the owner, not a member, or not signed in) |
 | `23514` | A value breaks a rule (for example credited seconds above the elapsed time) |
 | `22004` | A required value is missing (session id, credited seconds, or a note id when a note is sent) |
+| `22023` | Too many prayer points (over 20) or key scriptures (over 10), or a list in the wrong shape |
 
 ## What `complete_session` returns
 

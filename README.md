@@ -2,7 +2,7 @@
 
 Pray deliberately. Keep the hours.
 
-Stretch is a mobile-first prayer web app (a PWA) for iPhone and Android, installed to the home screen from the browser. This repository is at **Phase 2: sign-in and onboarding**. People can create an account, sign in, set their name, and manage their account. Prayers, stretches and sharing come in later phases.
+Stretch is a mobile-first prayer web app (a PWA) for iPhone and Android, installed to the home screen from the browser. This repository is at **Phase 3: prayers and altars**. People can sign in, then create and manage prayers and altars, each with prayer points and key scriptures. The stretch (the timed prayer session), notes, testimonies and sharing come in later phases.
 
 > **Placeholders to lock in Phase 6:** the app name ("Stretch"), the manifest `id` (`/`) and the icons (a plain letter S) are placeholders. Changing a manifest `id` after people have installed the app makes phones treat it as a different app, so it is decided once, in Phase 6. There is no service worker or offline support yet.
 
@@ -66,6 +66,26 @@ Signed-out visitors are always sent to `/sign-in`. That check runs in `src/lib/s
 
 Before opening Stretch beyond friends and family: add an email service (custom SMTP), turn **Confirm email** back on, and consider one-time codes in place of passwords. The sign-in form lives in one component, `src/features/auth/AuthForm.tsx`, so that change stays small.
 
+## Prayers and altars
+
+A **prayer** is something specific you are asking for. An **altar** is a long-term prayer you keep returning to. A **stretch** is one timed session of prayer (Phase 4).
+
+| Screen | Address | What it does |
+|---|---|---|
+| Pray | `/` | Tiles for your active altars and prayers. The + button starts a new one |
+| My Prayers | `/prayers` | Three lists with counts: Prayers, Altars, Archived |
+| New | `/prayers/new` | Title (1 to 80 characters), type, an optional plan, prayer points, key scriptures |
+| Detail | `/prayers/[id]` | Title, type, plan, hours so far, points, scriptures, and Edit, Archive, Delete |
+| Edit | `/prayers/[id]/edit` | The same form. The type is fixed once created |
+
+- **Plan (optional):** a target of 1 to 10,000 hours, and for prayers a start and end date. Altars have no end date.
+- **Limits:** up to 20 prayer points of 300 characters, and up to 10 key scriptures.
+- **Archive** sets a prayer aside: it leaves the active lists, keeps everything, and can be reactivated. It cannot be edited while archived.
+- **Delete** asks first, then removes the prayer and everything under it.
+- **Privacy:** a prayer that does not exist and a prayer that is not yours show the same not-found page.
+
+The code lives in `src/features/prayers/`. Reads are in `queries.ts`, writes in `mutations.ts`, input rules in `validation.ts`. Saving is one all-or-nothing call to the `save_prayer` database function, so a dropped connection can never leave a prayer half saved.
+
 ## Checks
 
 ```bash
@@ -107,7 +127,7 @@ The database lives in a hosted Supabase project named **Stretch**. Its schema is
 | Table | Holds |
 |---|---|
 | `profiles` | One row per person, created automatically when they sign up. `display_name` is empty until onboarding |
-| `prayers` | Prayers and altars, each owned by one person |
+| `prayers` | Prayers and altars, each owned by one person, with an optional plan (target hours, start and end date) |
 | `prayer_members` | Who belongs to which prayer, as owner or member |
 | `prayer_invites` | The current 8 character invite code for a prayer |
 | `prayer_points` | The ordered points of a prayer |
@@ -126,6 +146,7 @@ Row level security is on for every table. In short: people can read and change o
 | `get_prayer_hours(prayer_ids)` | The caller's seconds and the group's seconds for prayers they belong to |
 | `get_my_hours(since)` | The caller's own seconds since a date, and in total |
 | `delete_my_account()` | Deletes the caller's account, their data and the prayers they own |
+| `save_prayer(...)` | Creates or updates a prayer with its points and scriptures in one step. Owner only |
 
 Helper functions used only by the security rules live in a `private` schema, which the API does not expose.
 
@@ -211,20 +232,20 @@ You should see the sign-in screen. Create an account, enter your name, and you s
 
 **Android (Chrome):** tap the three-dot menu, then **Add to Home screen** (or **Install app**), then **Install**.
 
-In both cases you should get a deep violet icon with a letter S, named Stretch. Opening it should show the app full screen, with no browser address bar, in portrait, with the tab bar clear of the home bar.
+In both cases you should get a forest green icon with a letter S, named Stretch. Opening it should show the app full screen, with no browser address bar, in portrait, with the tab bar clear of the home bar.
 
 ## Project layout
 
 ```
 src/app          routes: (auth) holds sign-in and sign-up; (tabs) holds the four tab screens;
-                 welcome, prayer/[id] and stretch/[prayerId] are full screen
+                 (focus) holds full-screen pages: prayers/new, prayers/[id], stretch/[prayerId]
 src/components   shared UI: Button, TextField, FormError, TabBar, ConfirmDialog, PageHeader
-src/features     code that belongs to one feature: auth (forms, checks, messages), profile
+src/features     code that belongs to one feature: auth, profile, prayers
 src/lib          Supabase clients (lib/supabase) and helpers
 src/types        database.ts, generated from the schema
 supabase/migrations   the schema, security rules and database functions
 supabase/tests        SQL tests that prove the security rules
-e2e              Playwright tests: sign-in journey and the app smoke test
+e2e              Playwright tests: sign-in journey, prayers and altars, and the app smoke test
 docs             screenshots, and later the prototype
 ```
 
