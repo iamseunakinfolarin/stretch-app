@@ -250,3 +250,15 @@ docs             screenshots, and later the prototype
 ```
 
 Conventions for anyone (or any AI assistant) working here are in [CLAUDE.md](CLAUDE.md). Confirmations always use `src/components/ConfirmDialog`, never `window.confirm` or `window.alert`. Theme tokens (colors, type, spacing, radii) are in `src/app/globals.css`.
+
+## The stretch screen (Phase 4A)
+
+Open a prayer and tap **Start a stretch**. The screen shows the prayer points one at a time, the key
+scripture and the time prayed.
+
+- **Time** is worked out from stored timestamps (`src/features/stretch/clock.ts`), so a locked screen or a throttled tab cannot change it.
+- **Check-ins** ("Still praying?") appear at a random point every 4 to 6 minutes of praying time. There are 2 minutes to answer. If nobody does, the clock pauses at the moment the check-in appeared.
+- **Pause and resume** leave the paused time out of the total.
+- **Ending** saves the time through `complete_session`. Under a minute is not saved, and credit is capped at 24 hours.
+- **Dropped connection:** a running stretch and any finished one not yet saved are kept in the phone's `localStorage`, and sent again when the app opens or comes back online. The id is chosen when the stretch starts, so sending twice saves once.
+- No database change was needed for this phase.

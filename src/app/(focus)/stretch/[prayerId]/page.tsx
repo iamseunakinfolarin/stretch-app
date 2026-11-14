@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/BackLink";
+import { notFound, redirect } from "next/navigation";
+import { getPrayer } from "@/features/prayers/queries";
+import { isArchived } from "@/features/prayers/types";
+import { StretchScreen } from "@/features/stretch/StretchScreen";
 
 export const metadata: Metadata = { title: "Stretch" };
 
-/** Placeholder: the timed prayer session arrives in Phase 4. */
-export default function StretchPage() {
-  return (
-    <>
-      <BackLink href="/">Pray</BackLink>
-      <h1 className="mt-4 text-title font-bold text-forest">Stretch</h1>
-      <p className="mt-3 text-muted">The timed prayer session for this prayer will run here.</p>
-    </>
-  );
+export default async function StretchPage({ params }: { params: Promise<{ prayerId: string }> }) {
+  const { prayerId } = await params;
+  const prayer = await getPrayer(prayerId);
+  // Missing and not yours look identical.
+  if (!prayer) notFound();
+  // An archived prayer is set aside: reactivate it first.
+  if (isArchived(prayer)) redirect(`/prayers/${prayer.id}`);
+
+  return <StretchScreen prayerId={prayer.id} title={prayer.title} points={prayer.points} scriptures={prayer.scriptures} />;
 }

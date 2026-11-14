@@ -63,3 +63,10 @@ export function dataErrorMessage(error: unknown): string {
   if (e.code === "42501") return "You can't change this. It may belong to someone else, or you may need to sign in again.";
   return FALLBACK;
 }
+
+/** What to tell a person when a stretch ends. */
+export const STRETCH_MESSAGES = {
+  tooShort: "That was under a minute, so it wasn't saved. A stretch counts once you've prayed for a full minute.",
+  waiting: "Your stretch is saved on this phone. It will be added to your hours as soon as you're back online.",
+  refused: "We couldn't add that stretch to this prayer. It may belong to someone else, or you may need to sign in again.",
+} as const;
