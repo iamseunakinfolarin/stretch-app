@@ -14,8 +14,15 @@ describe("authErrorMessage", () => {
     expect(authErrorMessage({ name: "AuthRetryableFetchError", message: "Failed to fetch" })).toMatch(/connection/);
     expect(authErrorMessage(new TypeError("Failed to fetch"))).toMatch(/connection/);
   });
-  it("explains the email confirmation setting", () => {
-    expect(authErrorMessage({ code: "email_not_confirmed" })).toMatch(/confirmation/);
+  it("explains email confirmation in plain words", () => {
+    expect(authErrorMessage({ code: "confirmation_sent" })).toMatch(/sent you a confirmation email/);
+    expect(authErrorMessage({ code: "email_not_confirmed" })).toMatch(/hasn't been confirmed/);
+    expect(authErrorMessage({ code: "email_address_not_authorized" })).toMatch(/can't send a confirmation email/);
+  });
+  it("never says confirmation is not set up", () => {
+    for (const code of ["confirmation_sent", "email_not_confirmed", "email_address_not_authorized"]) {
+      expect(authErrorMessage({ code })).not.toMatch(/isn't set up/);
+    }
   });
   it("never shows a raw technical message", () => {
     expect(authErrorMessage({ code: "unexpected_failure", message: "pq: deadlock detected" })).toBe(

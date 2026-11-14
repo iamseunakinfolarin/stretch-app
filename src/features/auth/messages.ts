@@ -39,9 +39,12 @@ export function authErrorMessage(error: unknown): string {
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
       return "Too many tries. Wait a minute, then try again.";
+    case "confirmation_sent":
+      return "We've sent you a confirmation email. Open it, then come back and sign in. If it doesn't arrive, ask the person who invited you.";
     case "email_not_confirmed":
+      return "This account hasn't been confirmed yet. Open the confirmation email we sent you, then sign in.";
     case "email_address_not_authorized":
-      return "This account is waiting for email confirmation, which isn't set up yet. Ask the person who invited you.";
+      return "We can't send a confirmation email to this address yet. Ask the person who invited you.";
   }
   if (message.includes("invalid login credentials")) {
     return "That email and password don't match. Check them and try again.";

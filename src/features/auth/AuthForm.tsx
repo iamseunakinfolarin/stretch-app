@@ -63,8 +63,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
         const { data, error } = await supabase.auth.signUp(credentials);
         if (error) throw error;
         if (!data.session) {
-          // The project still requires email confirmation, and no email service is set up.
-          throw { code: "email_not_confirmed" };
+          // The project requires email confirmation, so no session comes back yet. For an email that
+          // already has an account, Supabase hides that fact by answering with a user that has no identities.
+          throw { code: data.user?.identities?.length === 0 ? "user_already_exists" : "confirmation_sent" };
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword(credentials);
