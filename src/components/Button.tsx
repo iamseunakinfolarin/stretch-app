@@ -15,6 +15,11 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   busyLabel?: string;
 };
 
+/** The same look for a link that should read as a button. */
+export function buttonClass(variant: Variant = "primary", className = ""): string {
+  return `inline-flex min-h-field w-full items-center justify-center rounded-full px-6 font-semibold transition-colors ${VARIANTS[variant]} ${className}`;
+}
+
 /** The app's button. Always at least 44px tall; the main variants are 52px. */
 export function Button({
   variant = "primary",
@@ -31,7 +36,7 @@ export function Button({
       type={type}
       disabled={disabled || busy}
       aria-busy={busy || undefined}
-      className={`inline-flex min-h-field w-full items-center justify-center rounded-full px-6 font-semibold transition-colors disabled:opacity-60 ${VARIANTS[variant]} ${className}`}
+      className={buttonClass(variant, `disabled:opacity-60 ${className}`)}
       {...rest}
     >
       {busy && busyLabel ? busyLabel : children}

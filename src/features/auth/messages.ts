@@ -58,6 +58,8 @@ export function dataErrorMessage(error: unknown): string {
   const e = error as ErrorLike;
   if (isNetworkError(e)) return OFFLINE;
   if (e.code === "23514") return "That value isn't allowed. Check it and try again.";
-  if (e.code === "42501" || e.code === "28000") return "You need to sign in again to do that.";
+  if (e.code === "22023") return "That's more than a prayer can hold: up to 20 prayer points and 10 key scriptures.";
+  if (e.code === "28000") return "You need to sign in again to do that.";
+  if (e.code === "42501") return "You can't change this. It may belong to someone else, or you may need to sign in again.";
   return FALLBACK;
 }
