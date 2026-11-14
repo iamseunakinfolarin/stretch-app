@@ -79,8 +79,8 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-full min-h-tap flex-col items-center justify-center gap-0.5 rounded-control text-[0.75rem] font-medium ${
-                  active ? "text-pine" : "text-muted"
+                className={`flex h-full min-h-tap flex-col items-center justify-center gap-1 rounded-control font-mono text-[0.625rem] font-medium tracking-[0.08em] uppercase ${
+                  active ? "text-primary" : "text-muted"
                 }`}
               >
                 {tab.icon}

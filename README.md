@@ -2,7 +2,7 @@
 
 Pray deliberately. Keep the hours.
 
-Stretch is a mobile-first prayer web app (a PWA) for iPhone and Android, installed to the home screen from the browser. This repository is at **Phase 1: foundation**: the app shell, the installable manifest, and the complete v1 database with its security rules and tests. Feature screens come in later phases.
+Stretch is a mobile-first prayer web app (a PWA) for iPhone and Android, installed to the home screen from the browser. This repository is at **Phase 2: sign-in and onboarding**. People can create an account, sign in, set their name, and manage their account. Prayers, stretches and sharing come in later phases.
 
 > **Placeholders to lock in Phase 6:** the app name ("Stretch"), the manifest `id` (`/`) and the icons (a plain letter S) are placeholders. Changing a manifest `id` after people have installed the app makes phones treat it as a different app, so it is decided once, in Phase 6. There is no service worker or offline support yet.
 
@@ -42,7 +42,29 @@ Both Supabase values are public by design and safe in the browser. **Never put t
 npm run dev
 ```
 
-Open http://localhost:3000. The Profile tab shows **Database connected** when the app can reach Supabase.
+Open http://localhost:3000. You will land on the sign-in screen. Create an account to get in.
+
+## Signing in
+
+Stretch uses **email and password**, with no emails sent. This is the simplest setup that works while the app is only for friends and family.
+
+| Screen | What it does |
+|---|---|
+| `/sign-up` | Create an account with an email and a password of 8 characters or more. You are signed in straight away |
+| `/sign-in` | Sign in |
+| `/welcome` | Asks for your name the first time. Nobody reaches the app without one |
+| Profile tab | Shows your name and email. Change your name, sign out, or delete your account |
+
+Signed-out visitors are always sent to `/sign-in`. That check runs in `src/lib/supabase/proxy.ts`. The name check runs in `src/features/profile/ProfileGate.tsx`, which wraps every screen inside the app.
+
+**The one Supabase setting this needs:** in the Supabase dashboard, open the **Stretch** project, then **Authentication > Sign In / Providers > Email**, and turn **Confirm email** off. While it is on, new accounts wait for a confirmation email that Supabase's built-in email service only delivers to members of your Supabase organization, so nobody else can sign up.
+
+**What this setup does not do, on purpose:**
+
+- **No "forgot password" email.** If someone forgets their password, the project owner resets it (ask Claude to do it through the Supabase connector, or remove the user under Authentication > Users so they can sign up again).
+- **Email addresses are not verified.** Anyone with the web address can create an account. They see only their own data.
+
+Before opening Stretch beyond friends and family: add an email service (custom SMTP), turn **Confirm email** back on, and consider one-time codes in place of passwords. The sign-in form lives in one component, `src/features/auth/AuthForm.tsx`, so that change stays small.
 
 ## Checks
 
@@ -71,7 +93,9 @@ npm run test:db
 ```
 
 - `npm test` runs the Vitest unit tests.
-- `npm run test:e2e` runs the Playwright smoke test at 390x844 and 412x915 and saves screenshots to `docs/screenshots/`. To run it against a deployed preview: `PLAYWRIGHT_BASE_URL=https://your-preview.vercel.app npm run test:e2e`.
+- `npm run test:e2e` runs the Playwright tests at 390x844 and 412x915 and saves screenshots to `docs/screenshots/`. They sign up real accounts, so they run against the **local** Supabase stack: start it first with `npm run db:start`. Every account a test creates is deleted again through the app's own "Delete account" button.
+  - Against the hosted project (creates and deletes real accounts there): `STRETCH_E2E_TARGET=hosted npm run test:e2e`
+  - Against a deployed address: `PLAYWRIGHT_BASE_URL=https://your-address.vercel.app npm run test:e2e`
 - `npm run test:db` runs the SQL security tests. See [supabase/tests/README.md](supabase/tests/README.md).
 
 ## Database
@@ -95,7 +119,7 @@ Row level security is on for every table. In short: people can read and change o
 
 | Function | What it does |
 |---|---|
-| `ping()` | Returns `ok`. The Profile tab uses it to show "Database connected" |
+| `ping()` | Returns `ok`. A quick way to check the app can reach the database |
 | `create_or_reset_invite(prayer_id)` | Owner only. Creates or replaces the invite code |
 | `join_prayer_by_code(code)` | Adds the caller to a prayer as a member |
 | `complete_session(...)` | Saves a stretch and an optional note. Under one minute is discarded; credit is capped at 24 hours |
@@ -179,7 +203,7 @@ Then run the checks listed under [Checks](#checks).
 3. Deploy. Every branch and pull request then gets its own preview address. Find it on the pull request (the Vercel comment) or in Vercel under **Deployments**.
 4. Open that address in **Safari on iPhone** or **Chrome on Android**. If Vercel asks you to sign in, either sign in with your Vercel account on the phone, or turn off **Settings > Deployment Protection > Vercel Authentication** for the project.
 
-You should see the Pray screen with four tabs along the bottom. Tap Profile and you should see **Database connected**.
+You should see the sign-in screen. Create an account, enter your name, and you should land on the Pray screen with four tabs along the bottom. The Profile tab shows your name and email.
 
 ## Add it to your home screen
 
@@ -187,19 +211,20 @@ You should see the Pray screen with four tabs along the bottom. Tap Profile and 
 
 **Android (Chrome):** tap the three-dot menu, then **Add to Home screen** (or **Install app**), then **Install**.
 
-In both cases you should get a dark green icon with a letter S, named Stretch. Opening it should show the app full screen, with no browser address bar, in portrait, with the tab bar clear of the home bar.
+In both cases you should get a deep violet icon with a letter S, named Stretch. Opening it should show the app full screen, with no browser address bar, in portrait, with the tab bar clear of the home bar.
 
 ## Project layout
 
 ```
-src/app          routes: (tabs) holds the four tab screens; prayer/[id] and stretch/[prayerId] are full screen
-src/components   shared UI: TabBar, ConfirmDialog, PageHeader, MissingConfig
-src/features     code that belongs to one feature
+src/app          routes: (auth) holds sign-in and sign-up; (tabs) holds the four tab screens;
+                 welcome, prayer/[id] and stretch/[prayerId] are full screen
+src/components   shared UI: Button, TextField, FormError, TabBar, ConfirmDialog, PageHeader
+src/features     code that belongs to one feature: auth (forms, checks, messages), profile
 src/lib          Supabase clients (lib/supabase) and helpers
 src/types        database.ts, generated from the schema
 supabase/migrations   the schema, security rules and database functions
 supabase/tests        SQL tests that prove the security rules
-e2e              Playwright smoke test
+e2e              Playwright tests: sign-in journey and the app smoke test
 docs             screenshots, and later the prototype
 ```
 

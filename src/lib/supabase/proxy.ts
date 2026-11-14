@@ -4,9 +4,23 @@ import type { Database } from "@/types/database";
 import { getSupabaseEnv } from "./env";
 
 /**
- * Refreshes the Supabase session cookie on each request, as Supabase's Next.js guide describes.
- * Redirecting signed-out visitors to the sign-in screen is added in Phase 2.
+ * Refreshes the Supabase session cookie on each request, as Supabase's Next.js guide describes,
+ * and keeps people on the right side of the door: signed-out visitors go to sign-in,
+ * signed-in people skip the sign-in screens. Onboarding is checked by ProfileGate.
  */
+/** The screens a signed-out visitor may see. Everything else needs a session. */
+const AUTH_SCREENS = ["/sign-in", "/sign-up"];
+
+/** A redirect that still carries any refreshed session cookies to the browser. */
+function redirectTo(request: NextRequest, from: NextResponse, pathname: string) {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = "";
+  const response = NextResponse.redirect(url);
+  from.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+  return response;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -31,7 +45,14 @@ export async function updateSession(request: NextRequest) {
 
   // Do not run code between createServerClient and getClaims().
   // getClaims() verifies the token and refreshes it when it has expired.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const signedIn = Boolean(data?.claims?.sub);
+
+  const { pathname } = request.nextUrl;
+  const onAuthScreen = AUTH_SCREENS.includes(pathname);
+
+  if (!signedIn && !onAuthScreen) return redirectTo(request, supabaseResponse, "/sign-in");
+  if (signedIn && onAuthScreen) return redirectTo(request, supabaseResponse, "/");
 
   // Return supabaseResponse as is, so the refreshed cookies reach the browser.
   return supabaseResponse;

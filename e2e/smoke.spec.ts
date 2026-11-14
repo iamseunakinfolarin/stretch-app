@@ -1,4 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { SESSION_FILE } from "../playwright.config";
+import { SHARED_NAME } from "./helpers";
+
+// These tests run inside the app, signed in as the account auth.setup.ts created.
+test.use({ storageState: SESSION_FILE });
 
 const TABS = [
   { label: "Pray", path: "/", file: "pray" },
@@ -19,7 +24,8 @@ test("the four tabs show, and each one opens", async ({ page }, testInfo) => {
     await expect(nav.getByRole("link", { name: tab.label, exact: true })).toHaveAttribute("aria-current", "page");
 
     if (tab.label === "Profile") {
-      await expect(page.getByText("Database connected")).toBeVisible();
+      // The name comes from the database, read with the signed-in person's own permissions.
+      await expect(page.getByRole("region", { name: "Your details" })).toContainText(SHARED_NAME);
     }
     await page.screenshot({ path: `docs/screenshots/${testInfo.project.name}-${tab.file}.png` });
   }
@@ -106,7 +112,7 @@ test("the page head has what iPhone and Android need for Add to Home Screen", as
   await expect(head.locator('link[rel="manifest"]')).toHaveAttribute("href", /manifest\.webmanifest/);
   await expect(head.locator('meta[name="viewport"]')).toHaveAttribute("content", /viewport-fit=cover/);
   await expect(head.locator('meta[name="viewport"]')).toHaveAttribute("content", /width=device-width/);
-  await expect(head.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#f6f2ea");
+  await expect(head.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#f5efff");
   await expect(head.locator('meta[name="apple-mobile-web-app-capable"]')).toHaveAttribute("content", "yes");
   await expect(head.locator('meta[name="mobile-web-app-capable"]')).toHaveAttribute("content", "yes");
   await expect(head.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute("content", "Stretch");
