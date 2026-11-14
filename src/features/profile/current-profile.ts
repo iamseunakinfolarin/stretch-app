@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { connection } from "next/server";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,10 +9,6 @@ export type CurrentProfile = { id: string; email: string; displayName: string | 
  * Sends signed-out visitors to sign-in. Reads the session, so call it inside a <Suspense> boundary.
  */
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile> => {
-  // Who is signed in is only known when the request arrives, so never pre-render this.
-  // (The Supabase client also reads the clock, which Next does not allow while pre-rendering.)
-  await connection();
-
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;

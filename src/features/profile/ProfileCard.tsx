@@ -64,13 +64,13 @@ export function ProfileCard() {
           <>
             <dl className="flex flex-col gap-5">
               <div>
-                <dt className="label-mono text-muted">Name</dt>
-                <dd className="mt-1 font-serif text-[1.75rem] leading-tight break-words text-ink">
+                <dt className="eyebrow text-muted">Name</dt>
+                <dd className="mt-1 text-heading font-bold break-words text-ink">
                   {profile.displayName}
                 </dd>
               </div>
               <div>
-                <dt className="label-mono text-muted">Email</dt>
+                <dt className="eyebrow text-muted">Email</dt>
                 <dd className="mt-1 break-all text-ink">{profile.email}</dd>
               </div>
             </dl>

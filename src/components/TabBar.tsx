@@ -69,7 +69,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-surface/95 pb-safe-bar backdrop-blur"
+      className="fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 border-t border-hairline bg-surface/95 pb-safe-bar backdrop-blur"
     >
       <ul className="mx-auto flex h-tabbar w-full max-w-md items-stretch px-1">
         {TABS.map((tab) => {
@@ -79,7 +79,7 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-full min-h-tap flex-col items-center justify-center gap-1 rounded-control font-mono text-[0.625rem] font-medium tracking-[0.08em] uppercase ${
+                className={`flex h-full min-h-tap flex-col items-center justify-center gap-1 rounded-control text-[0.6875rem] font-semibold ${
                   active ? "text-primary" : "text-muted"
                 }`}
               >

@@ -63,7 +63,7 @@ export function ConfirmDialog({
       className="m-auto w-[calc(100%-2.5rem)] max-w-sm rounded-card bg-surface p-0 text-ink shadow-dialog"
     >
       <div className="p-6">
-        <h2 id={titleId} className="font-serif text-[1.75rem] leading-tight">
+        <h2 id={titleId} className="text-heading font-bold">
           {title}
         </h2>
         {description ? (

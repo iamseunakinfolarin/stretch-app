@@ -1,7 +1,7 @@
 type Variant = "primary" | "secondary" | "danger" | "quiet" | "quiet-danger";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-primary text-white active:bg-primary-deep",
+  primary: "bg-brand text-white active:brightness-90",
   secondary: "border border-hairline bg-surface text-ink active:bg-wash",
   danger: "bg-danger text-white active:opacity-90",
   quiet: "text-primary active:bg-wash",
@@ -14,6 +14,11 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   busy?: boolean;
   busyLabel?: string;
 };
+
+/** The same look for a link that should read as a button. */
+export function buttonClass(variant: Variant = "primary", className = ""): string {
+  return `inline-flex min-h-field w-full items-center justify-center rounded-full px-6 font-semibold transition-colors ${VARIANTS[variant]} ${className}`;
+}
 
 /** The app's button. Always at least 44px tall; the main variants are 52px. */
 export function Button({
@@ -31,7 +36,7 @@ export function Button({
       type={type}
       disabled={disabled || busy}
       aria-busy={busy || undefined}
-      className={`inline-flex min-h-field w-full items-center justify-center rounded-control px-5 font-semibold transition-colors disabled:opacity-60 ${VARIANTS[variant]} ${className}`}
+      className={buttonClass(variant, `disabled:opacity-60 ${className}`)}
       {...rest}
     >
       {busy && busyLabel ? busyLabel : children}

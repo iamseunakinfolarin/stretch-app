@@ -12,7 +12,7 @@
 //                                 against the hosted project through the Supabase MCP
 
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -60,13 +60,15 @@ const combined = () =>
     "",
   ].join("\n");
 
+// writeSync, not process.stdout.write: exiting straight after an async write to a pipe
+// cuts the output off once it passes the pipe's buffer size.
 if (args.includes("--print-combined")) {
-  process.stdout.write(combined());
+  writeSync(1, combined());
   process.exit(0);
 }
 
 if (print) {
-  for (const file of tests) process.stdout.write(bundle(file));
+  for (const file of tests) writeSync(1, bundle(file));
   process.exit(0);
 }
 
