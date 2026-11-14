@@ -1,5 +1,6 @@
 import { TabBar } from "@/components/TabBar";
 import { ListSkeleton } from "@/features/prayers/Skeletons";
+import { PendingStretchSync } from "@/features/stretch/PendingStretchSync";
 import { ProfileGate } from "@/features/profile/ProfileGate";
 
 // These screens read the session and may redirect, so they render at request time.
@@ -10,7 +11,10 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <main className="mx-auto w-full max-w-md px-safe pt-safe pb-safe-tabbar">
-        <ProfileGate fallback={<ListSkeleton />}>{children}</ProfileGate>
+        <ProfileGate fallback={<ListSkeleton />}>
+          <PendingStretchSync />
+          {children}
+        </ProfileGate>
       </main>
       <TabBar />
     </>

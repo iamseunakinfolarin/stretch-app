@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { BackLink } from "@/components/BackLink";
+import { buttonClass } from "@/components/Button";
 import { formatHours, formatPlan, targetProgress } from "@/features/prayers/format";
 import { PrayerActions } from "@/features/prayers/PrayerActions";
 import { KindChip } from "@/features/prayers/PrayerBits";
@@ -29,6 +31,14 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
       </div>
       <h1 className="mt-3 text-title font-bold break-words text-forest">{prayer.title}</h1>
       <p className="mt-2 text-muted">{plan ?? "No plan set."}</p>
+
+      {!archived ? (
+        <div className="mt-6">
+          <Link href={`/stretch/${prayer.id}`} className={buttonClass("primary")}>
+            Start a stretch
+          </Link>
+        </div>
+      ) : null}
 
       <section aria-label="Hours prayed" className="mt-6 rounded-card border border-hairline bg-surface p-5 shadow-card">
         <p className="eyebrow text-muted">Hours so far</p>

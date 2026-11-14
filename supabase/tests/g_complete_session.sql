@@ -1,5 +1,5 @@
 -- complete_session: calling it twice with the same ids stores one session and one note;
--- a stretch under one minute is discarded; credited time is capped at 24 hours;
+-- a stretch under one minute is discarded; a stretch has no maximum length;
 -- credited time above the elapsed time is rejected.
 select tests.act_as('member');
 
@@ -34,15 +34,17 @@ select tests.expect_count($$select 1 from public.entries where id = '30000000-00
 -- Exactly one minute is a stretch.
 select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000e1', tests.id('prayer'), now() - interval '10 minutes', now(), 60)$$, '20000000-0000-4000-a000-0000000000e1', 'exactly 60 seconds is saved');
 
--- Over 24 hours: saved as exactly 24 hours.
+-- No maximum length: a long stretch is saved exactly as sent.
 select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000c1', tests.id('prayer'), now() - interval '30 hours', now(), 90000)$$, '20000000-0000-4000-a000-0000000000c1', '25 hours of credit is accepted');
-select tests.expect_value($$select credited_seconds from public.prayer_sessions where id = '20000000-0000-4000-a000-0000000000c1'$$, '86400', 'and stored as exactly 24 hours');
-select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000c2', tests.id('prayer'), now() - interval '24 hours', now(), 86400)$$, '20000000-0000-4000-a000-0000000000c2', 'exactly 24 hours is saved as it is');
-select tests.expect_value($$select credited_seconds from public.prayer_sessions where id = '20000000-0000-4000-a000-0000000000c2'$$, '86400', 'exactly 24 hours is stored unchanged');
+select tests.expect_value($$select credited_seconds from public.prayer_sessions where id = '20000000-0000-4000-a000-0000000000c1'$$, '90000', 'and stored in full');
+select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000c2', tests.id('prayer'), now() - interval '24 hours', now(), 86400)$$, '20000000-0000-4000-a000-0000000000c2', 'exactly 24 hours is saved');
+select tests.expect_value($$select credited_seconds from public.prayer_sessions where id = '20000000-0000-4000-a000-0000000000c2'$$, '86400', 'and stored as it is');
+select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000c3', tests.id('prayer'), now() - interval '100 hours', now(), 360000)$$, '20000000-0000-4000-a000-0000000000c3', '100 hours of credit is accepted');
+select tests.expect_value($$select credited_seconds from public.prayer_sessions where id = '20000000-0000-4000-a000-0000000000c3'$$, '360000', 'and stored in full');
 
 -- More credit than the clock allows is a broken request, and is refused.
 select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now() - interval '10 minutes', now(), 601)$$, '23514', 'more than the elapsed time is rejected');
-select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now() - interval '2 hours', now(), 90000)$$, '23514', 'a capped value still cannot exceed the elapsed time');
+select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now() - interval '2 hours', now(), 90000)$$, '23514', 'a large value still cannot exceed the elapsed time');
 select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now(), now() - interval '10 minutes', 60)$$, '23514', 'ending before starting is rejected');
 select tests.expect_value($$select public.complete_session('20000000-0000-4000-a000-0000000000e2', tests.id('prayer'), now() - interval '10 minutes', now(), 600)$$, '20000000-0000-4000-a000-0000000000e2', 'exactly the elapsed time is accepted');
 
@@ -60,8 +62,8 @@ select tests.expect_value($$select public.complete_session(gen_random_uuid(), te
 select tests.act_as_anon();
 select tests.expect_error($$select public.complete_session(gen_random_uuid(), tests.id('prayer'), now() - interval '10 minutes', now(), 300)$$, '42501', 'signed-out visitor cannot log a stretch');
 
--- What is really stored: 2 from the fixtures, then new_session, e1, c1, c2 and e2.
+-- What is really stored: 2 from the fixtures, then new_session, e1, c1, c2, c3 and e2.
 select tests.reset();
-select tests.expect_count($$select 1 from public.prayer_sessions where prayer_id = tests.id('prayer')$$, 7, 'no discarded or rejected call left a session behind');
-select tests.expect_count($$select 1 from public.prayer_sessions where credited_seconds < 60 or credited_seconds > 86400$$, 0, 'every stored stretch is between one minute and 24 hours');
+select tests.expect_count($$select 1 from public.prayer_sessions where prayer_id = tests.id('prayer')$$, 8, 'no discarded or rejected call left a session behind');
+select tests.expect_count($$select 1 from public.prayer_sessions where credited_seconds < 60$$, 0, 'every stored stretch is at least one minute');
 select tests.expect_count($$select 1 from public.entries where prayer_id = tests.id('prayer')$$, 5, 'only the two real notes were added');
