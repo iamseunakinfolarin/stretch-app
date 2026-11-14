@@ -42,13 +42,14 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `d_sessions_private_hours_pooled.sql` | Nobody can read another user's session rows, but `get_prayer_hours` returns the correct group total. Your own stretches and hours stay yours after you leave a prayer |
 | `e_join_by_code.sql` | `join_prayer_by_code` works with a valid code, is safe to repeat, and rejects invalid codes and archived prayers |
 | `f_invite_owner_only.sql` | Only the owner can create or reset an invite code, and a reset makes the old code fail |
-| `g_complete_session.sql` | `complete_session` called twice with the same ids stores one session and one note; a stretch under one minute is discarded (its note is kept); credited time is capped at 24 hours; more than the elapsed time is rejected |
+| `g_complete_session.sql` | `complete_session` called twice with the same ids stores one session and one note; a stretch under one minute is discarded (its note is kept); a stretch has no maximum length; more than the elapsed time is rejected |
 | `h_membership_deletes.sql` | A member can leave; a member can't remove anyone else; the owner can remove a member; nobody can delete the owner row directly |
 | `i_create_prayer.sql` | Creating a prayer creates the owner membership, and the creator can read the new prayer straight away |
 | `j_delete_my_account.sql` | `delete_my_account` removes only the caller's own data and the prayers they own |
 | `k_structure_and_grants.sql` | Eight tables with RLS on, the seven app functions, the profile trigger, the indexes, and exactly which functions and tables each role may use |
 | `l_prayers_crud.sql` | A person can create, read, update and delete only their own prayers; points and scriptures follow their prayer's access; deleting a prayer removes them; the plan's rules hold |
 | `m_save_prayer.sql` | `save_prayer` saves a prayer with its points and scriptures all or nothing; a retry changes nothing; order is kept; limits of 20 and 10 hold; only the owner can save; another prayer's point cannot be taken over |
+| `n_stretch_rules.sql` | The database itself rejects a stretch under one minute (even a direct insert) and lets only the owner or a member of the prayer save one; there is no maximum length |
 
 ## Error codes the app can rely on
 
@@ -67,6 +68,6 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 |---|---|
 | A stretch of one minute or more | Saved. Returns the session id |
 | Under one minute | Not saved, no error. Returns `null`. A note sent with it is still saved, without a link to a stretch |
-| More than 24 hours of credit | Saved as exactly 24 hours |
+| Any length of one minute or more | Saved exactly as sent. There is no maximum |
 | More credit than the time between start and end | Refused with `23514` |
 | The same ids sent again | Nothing new is created. Returns the same result |

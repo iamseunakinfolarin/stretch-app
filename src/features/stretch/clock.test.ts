@@ -155,11 +155,10 @@ describe("ending", () => {
     expect(f.creditedSeconds).toBeLessThanOrEqual((f.endedAt - f.startedAt) / 1000);
   });
 
-  it("caps credit at 24 hours", () => {
-    const s = pauseStretch(begin(), T0);
-    const running = resumeStretch(s, T0, at(0.5));
-    const f = finishStretch({ ...running, nextCheckInAtActiveMs: Number.MAX_SAFE_INTEGER }, T0 + 30 * 3600_000);
-    expect(f.creditedSeconds).toBe(86_400);
+  it("has no maximum length", () => {
+    const running = { ...begin(), nextCheckInAtActiveMs: Number.MAX_SAFE_INTEGER };
+    const f = finishStretch(running, T0 + 30 * 3600_000);
+    expect(f.creditedSeconds).toBe(30 * 3600);
   });
 
   it("reports check-ins shown and confirmed", () => {

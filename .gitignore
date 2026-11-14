@@ -53,3 +53,6 @@ supabase/.branches/
 
 # playwright signed-in session
 /e2e/.auth/
+
+# Claude Code personal settings
+/.claude/settings.local.json

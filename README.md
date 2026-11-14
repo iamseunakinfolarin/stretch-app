@@ -142,7 +142,7 @@ Row level security is on for every table. In short: people can read and change o
 | `ping()` | Returns `ok`. A quick way to check the app can reach the database |
 | `create_or_reset_invite(prayer_id)` | Owner only. Creates or replaces the invite code |
 | `join_prayer_by_code(code)` | Adds the caller to a prayer as a member |
-| `complete_session(...)` | Saves a stretch and an optional note. Under one minute is discarded; credit is capped at 24 hours |
+| `complete_session(...)` | Saves a stretch and an optional note. Under one minute is discarded; a stretch has no maximum length |
 | `get_prayer_hours(prayer_ids)` | The caller's seconds and the group's seconds for prayers they belong to |
 | `get_my_hours(since)` | The caller's own seconds since a date, and in total |
 | `delete_my_account()` | Deletes the caller's account, their data and the prayers they own |
@@ -259,6 +259,6 @@ scripture and the time prayed.
 - **Time** is worked out from stored timestamps (`src/features/stretch/clock.ts`), so a locked screen or a throttled tab cannot change it.
 - **Check-ins** ("Still praying?") appear at a random point every 4 to 6 minutes of praying time. There are 2 minutes to answer. If nobody does, the clock pauses at the moment the check-in appeared.
 - **Pause and resume** leave the paused time out of the total.
-- **Ending** saves the time through `complete_session`. Under a minute is not saved, and credit is capped at 24 hours.
+- **Ending** saves the time through `complete_session`. Under a minute is not saved. A stretch has no maximum length.
 - **Dropped connection:** a running stretch and any finished one not yet saved are kept in the phone's `localStorage`, and sent again when the app opens or comes back online. The id is chosen when the stretch starts, so sending twice saves once.
 - No database change was needed for this phase.

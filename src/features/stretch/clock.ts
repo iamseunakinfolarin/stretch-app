@@ -10,8 +10,6 @@ export const CHECK_IN_MIN_MS = 4 * MINUTE_MS;
 export const CHECK_IN_MAX_MS = 6 * MINUTE_MS;
 /** The person has 2 minutes to answer a check-in. */
 export const CHECK_IN_WINDOW_MS = 2 * MINUTE_MS;
-/** A stretch is never credited for more than 24 hours. */
-export const MAX_CREDIT_SECONDS = 86_400;
 /** Under a minute is not a stretch, and is not saved. */
 export const MIN_CREDIT_SECONDS = 60;
 
@@ -163,7 +161,7 @@ export type FinishedStretch = {
   checkInsConfirmed: number;
 };
 
-/** Ends a stretch. Credit is the time spent praying, never more than 24 hours. */
+/** Ends a stretch. Credit is the time spent praying. A stretch has no maximum length. */
 export function finishStretch(stretch: Stretch, now: number): FinishedStretch {
   const settled = reconcile(stretch, now);
   return {
@@ -171,7 +169,7 @@ export function finishStretch(stretch: Stretch, now: number): FinishedStretch {
     prayerId: settled.prayerId,
     startedAt: settled.startedAt,
     endedAt: Math.max(now, settled.startedAt + 1),
-    creditedSeconds: Math.min(activeSeconds(settled, now), MAX_CREDIT_SECONDS),
+    creditedSeconds: activeSeconds(settled, now),
     checkInsShown: settled.checkInsShown,
     checkInsConfirmed: settled.checkInsConfirmed,
   };
