@@ -60,7 +60,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
       const credentials = { email: cleanEmail(email), password };
 
       if (mode === "sign-up") {
-        const { data, error } = await supabase.auth.signUp(credentials);
+        // The link in the confirmation email comes back to this same site, wherever it is running.
+        const { data, error } = await supabase.auth.signUp({
+          ...credentials,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        });
         if (error) throw error;
         if (!data.session) {
           // The project requires email confirmation, so no session comes back yet. For an email that
