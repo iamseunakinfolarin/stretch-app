@@ -39,14 +39,14 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `a_outsider_reads_nothing.sql` | An outsider can't read any prayer, point, scripture, member row, invite, session or entry of a prayer they don't belong to. Signed-out visitors can't query tables at all |
 | `b_member_read_not_write.sql` | A member can read the prayer, its points, scriptures, shared entries and member list, but can't change the prayer, points or scriptures |
 | `c_personal_entries_private.sql` | A member can't read the owner's personal entries, and the owner can't read the member's |
-| `d_sessions_private_hours_pooled.sql` | Nobody can read another user's session rows, but `get_prayer_hours` returns the correct group total |
+| `d_sessions_private_hours_pooled.sql` | Nobody can read another user's session rows, but `get_prayer_hours` returns the correct group total. Your own stretches and hours stay yours after you leave a prayer |
 | `e_join_by_code.sql` | `join_prayer_by_code` works with a valid code, is safe to repeat, and rejects invalid codes and archived prayers |
 | `f_invite_owner_only.sql` | Only the owner can create or reset an invite code, and a reset makes the old code fail |
-| `g_complete_session.sql` | `complete_session` called twice with the same ids stores one session and one note; under 60 seconds, or more than the elapsed time, is rejected |
+| `g_complete_session.sql` | `complete_session` called twice with the same ids stores one session and one note; a stretch under one minute is discarded (its note is kept); credited time is capped at 24 hours; more than the elapsed time is rejected |
 | `h_membership_deletes.sql` | A member can leave; a member can't remove anyone else; the owner can remove a member; nobody can delete the owner row directly |
 | `i_create_prayer.sql` | Creating a prayer creates the owner membership, and the creator can read the new prayer straight away |
 | `j_delete_my_account.sql` | `delete_my_account` removes only the caller's own data and the prayers they own |
-| `k_structure_and_grants.sql` | Eight tables with RLS on, the indexes and triggers, and exactly which functions and tables each role may use |
+| `k_structure_and_grants.sql` | Eight tables with RLS on, the seven app functions, the profile trigger, the indexes, and exactly which functions and tables each role may use |
 
 ## Error codes the app can rely on
 
@@ -55,4 +55,15 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `ST001` | The invite code is not valid |
 | `ST002` | The prayer is archived and can't be joined |
 | `42501` | Not allowed (not the owner, not a member, or not signed in) |
-| `23514` | A value breaks a rule (for example credited seconds under 60 or above the elapsed time) |
+| `23514` | A value breaks a rule (for example credited seconds above the elapsed time) |
+| `22004` | A required value is missing (session id, credited seconds, or a note id when a note is sent) |
+
+## What `complete_session` returns
+
+| Situation | Result |
+|---|---|
+| A stretch of one minute or more | Saved. Returns the session id |
+| Under one minute | Not saved, no error. Returns `null`. A note sent with it is still saved, without a link to a stretch |
+| More than 24 hours of credit | Saved as exactly 24 hours |
+| More credit than the time between start and end | Refused with `23514` |
+| The same ids sent again | Nothing new is created. Returns the same result |

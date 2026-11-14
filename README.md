@@ -76,11 +76,42 @@ npm run test:db
 
 ## Database
 
-The schema lives in `supabase/migrations/`. Every change is written there first, then that same SQL is applied to the hosted Supabase project (named **Stretch**) through the Supabase MCP `apply_migration` tool. The file names carry the versions recorded on the hosted project.
+The database lives in a hosted Supabase project named **Stretch**. Its schema is in `supabase/migrations/`. Every change is written there first, then that same SQL is applied to the hosted project through the Supabase connector (`apply_migration`). The file names carry the versions recorded on the hosted project.
 
-`src/types/database.ts` is generated from the hosted project's live schema with the Supabase MCP `generate_typescript_types` tool; do not edit it by hand. `npm run gen:types` produces the same types from the local database, which is useful while a migration is still in progress.
+### What is in it
 
-Local database for development and tests (needs Docker):
+| Table | Holds |
+|---|---|
+| `profiles` | One row per person, created automatically when they sign up. `display_name` is empty until onboarding |
+| `prayers` | Prayers and altars, each owned by one person |
+| `prayer_members` | Who belongs to which prayer, as owner or member |
+| `prayer_invites` | The current 8 character invite code for a prayer |
+| `prayer_points` | The ordered points of a prayer |
+| `scriptures` | The key scriptures of a prayer |
+| `prayer_sessions` | The stretches: timed prayer sessions |
+| `entries` | Notes and testimonies, personal or shared |
+
+Row level security is on for every table. In short: people can read and change only what belongs to them or to prayers they have joined, and only the owner can change a prayer. Signed-out visitors can call `ping()` and nothing else.
+
+| Function | What it does |
+|---|---|
+| `ping()` | Returns `ok`. The Profile tab uses it to show "Database connected" |
+| `create_or_reset_invite(prayer_id)` | Owner only. Creates or replaces the invite code |
+| `join_prayer_by_code(code)` | Adds the caller to a prayer as a member |
+| `complete_session(...)` | Saves a stretch and an optional note. Under one minute is discarded; credit is capped at 24 hours |
+| `get_prayer_hours(prayer_ids)` | The caller's seconds and the group's seconds for prayers they belong to |
+| `get_my_hours(since)` | The caller's own seconds since a date, and in total |
+| `delete_my_account()` | Deletes the caller's account, their data and the prayers they own |
+
+Helper functions used only by the security rules live in a `private` schema, which the API does not expose.
+
+### Types
+
+`src/types/database.ts` is generated from the hosted project's live schema with the Supabase connector (`generate_typescript_types`). Do not edit it by hand. `npm run gen:types` produces the same types from the local database, which is useful while a migration is still in progress.
+
+### Local database
+
+For development and tests (needs Docker):
 
 ```bash
 npm run db:start
@@ -91,6 +122,55 @@ npm run db:reset
 ```
 
 `db:reset` rebuilds the local database from the migration files. To use the local database from the app, set `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` and the publishable key printed by `npx supabase status`.
+
+### Changing the schema
+
+1. Add a new file under `supabase/migrations/`. Never edit a migration that has been applied.
+2. Apply it locally with `npm run db:reset` and run `npm run test:db`.
+3. Apply the same SQL to the hosted project with the Supabase connector.
+4. Rename the file to the version the hosted project recorded.
+5. Run the tests against the hosted project (see [supabase/tests/README.md](supabase/tests/README.md)) and the security and performance advisors.
+6. Regenerate `src/types/database.ts` from the hosted project.
+
+## Run this project from a cloud session
+
+These steps are for working on Stretch in a Claude Code cloud session (claude.ai/code), where nothing is installed yet.
+
+**Before starting the session**
+
+1. Give Claude access to the repository: at https://claude.ai/connect-github, make sure the Claude GitHub App can see `stretch-app`.
+2. Connect Supabase: at https://claude.ai/customize/connectors, add the Supabase connector.
+3. Start the session with the `stretch-app` repository and the **stretch-app** environment selected. That environment allows the session to reach the hosted Supabase project and the Vercel preview. The Default environment blocks both.
+
+**In the session**
+
+```bash
+git clone https://github.com/iamseunakinfolarin/stretch-app
+```
+
+```bash
+cd stretch-app && npm install
+```
+
+```bash
+cp .env.example .env.local
+```
+
+Fill `.env.local` with the project URL and publishable key. Both are public, and Claude can read them from the Supabase connector (`get_project_url` and `get_publishable_keys`), so nothing needs to be pasted into the chat. Never put the secret key or database password in the session.
+
+```bash
+npm run dev
+```
+
+Then run the checks listed under [Checks](#checks).
+
+**Things that behave differently in a cloud session**
+
+- **The connector can see every Supabase project in the organization.** Only the project named Stretch belongs to this app.
+- **The local database needs Docker**, and the Docker daemon is not running when a session starts. Start it with `dockerd` in the background, then `npm run db:start`. The first start downloads the Supabase images and takes a few minutes.
+- **Playwright** uses the Chromium already installed in the session. `@playwright/test` is pinned to the matching version, so do not run `playwright install`.
+- **GitHub from the command line:** `gh pr create` fails because GraphQL is not available. Use the REST API, for example `gh api repos/iamseunakinfolarin/stretch-app/pulls -X POST ...`.
+- **The session is temporary.** Anything not committed and pushed is lost when it ends.
 
 ## Open the app on your phone (Vercel preview)
 

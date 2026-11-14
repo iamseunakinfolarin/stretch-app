@@ -385,11 +385,8 @@ export type Database = {
           prayer_id: string
         }[]
       }
-      is_prayer_member: { Args: { prayer_id: string }; Returns: boolean }
-      is_prayer_owner: { Args: { prayer_id: string }; Returns: boolean }
       join_prayer_by_code: { Args: { code: string }; Returns: string }
       ping: { Args: never; Returns: string }
-      shares_prayer_with: { Args: { other_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
