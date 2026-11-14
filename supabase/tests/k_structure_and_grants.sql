@@ -1,5 +1,11 @@
--- 4. Structure: eight tables with RLS on, indexes, triggers, and who may call what.
+-- Structure: eight tables with RLS on, the seven app functions, indexes, triggers,
+-- and who may call what.
 select tests.expect_count($$select 1 from pg_tables where schemaname = 'public'$$, 8, 'the public schema has exactly eight tables');
+select tests.expect_value($$select string_agg(tablename, ',' order by tablename) from pg_tables where schemaname = 'public'$$,
+  'entries,prayer_invites,prayer_members,prayer_points,prayer_sessions,prayers,profiles,scriptures', 'the eight tables are the expected ones');
+select tests.expect_count($$select 1 from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in
+  ('ping','create_or_reset_invite','join_prayer_by_code','complete_session','get_prayer_hours','get_my_hours','delete_my_account')$$, 7, 'the seven app functions exist');
+select tests.expect_count($$select 1 from pg_trigger t where t.tgrelid = 'auth.users'::regclass and t.tgname = 'on_auth_user_created' and not t.tgisinternal$$, 1, 'the trigger that creates a profile for each new auth user exists');
 select tests.expect_count($$select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity
     and c.relname in ('profiles','prayers','prayer_members','prayer_invites','prayer_points','scriptures','prayer_sessions','entries')$$, 8, 'RLS is enabled on all eight tables');
@@ -21,10 +27,19 @@ select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname)
   where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')$$, 'ping', 'ping() is the only function anon may execute');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')$$,
-  'complete_session,create_or_reset_invite,delete_my_account,get_my_hours,get_prayer_hours,is_prayer_member,is_prayer_owner,join_prayer_by_code,ping,shares_prayer_with',
-  'authenticated may execute the app functions and nothing else');
+  'complete_session,create_or_reset_invite,delete_my_account,get_my_hours,get_prayer_hours,join_prayer_by_code,ping,save_prayer',
+  'in the API schema, authenticated may execute the app functions and nothing else');
+select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'private'$$, 'is_prayer_member,is_prayer_owner,shares_prayer_with', 'the policy helper functions live in the private schema, outside the API');
+select tests.expect_value($$select has_schema_privilege('anon', 'private', 'usage')$$, 'false', 'anon cannot use the private schema');
 select tests.expect_count($$select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and not coalesce(p.proconfig, '{}') @> array['search_path=""']$$, 0, 'every function has an empty search_path');
+  where n.nspname = 'private' and has_function_privilege('anon', p.oid, 'execute')$$, 0, 'anon cannot execute the helper functions');
+select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public' and p.prosecdef and has_function_privilege('authenticated', p.oid, 'execute')$$,
+  'create_or_reset_invite,delete_my_account,get_prayer_hours,join_prayer_by_code',
+  'only the four functions that need elevated rights are SECURITY DEFINER and callable');
+select tests.expect_count($$select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname in ('public', 'private') and not coalesce(p.proconfig, '{}') @> array['search_path=""']$$, 0, 'every function has an empty search_path');
 
 -- Signed-in users have only the table privileges the policies can use.
 select tests.expect_value($$select has_table_privilege('authenticated', 'public.prayer_members', 'insert, update')$$, 'false', 'authenticated cannot insert or update member rows');

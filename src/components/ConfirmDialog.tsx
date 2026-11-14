@@ -44,7 +44,7 @@ export function ConfirmDialog({
   }, [open]);
 
   const confirmTone =
-    tone === "danger" ? "bg-danger text-surface active:opacity-90" : "bg-pine text-surface active:bg-pine-deep";
+    tone === "danger" ? "bg-danger text-white active:opacity-90" : "bg-primary text-white active:bg-primary-deep";
 
   return (
     <dialog
@@ -63,7 +63,7 @@ export function ConfirmDialog({
       className="m-auto w-[calc(100%-2.5rem)] max-w-sm rounded-card bg-surface p-0 text-ink shadow-dialog"
     >
       <div className="p-6">
-        <h2 id={titleId} className="font-serif text-[1.375rem] leading-snug">
+        <h2 id={titleId} className="text-heading font-bold">
           {title}
         </h2>
         {description ? (

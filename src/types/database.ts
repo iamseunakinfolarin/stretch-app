@@ -244,8 +244,10 @@ export type Database = {
           id: string
           kind: string
           owner_id: string
+          planned_end_date: string | null
           planned_start_date: string | null
           status: string
+          target_hours: number | null
           title: string
           updated_at: string
         }
@@ -257,8 +259,10 @@ export type Database = {
           id?: string
           kind?: string
           owner_id: string
+          planned_end_date?: string | null
           planned_start_date?: string | null
           status?: string
+          target_hours?: number | null
           title: string
           updated_at?: string
         }
@@ -270,8 +274,10 @@ export type Database = {
           id?: string
           kind?: string
           owner_id?: string
+          planned_end_date?: string | null
           planned_start_date?: string | null
           status?: string
+          target_hours?: number | null
           title?: string
           updated_at?: string
         }
@@ -385,11 +391,21 @@ export type Database = {
           prayer_id: string
         }[]
       }
-      is_prayer_member: { Args: { prayer_id: string }; Returns: boolean }
-      is_prayer_owner: { Args: { prayer_id: string }; Returns: boolean }
       join_prayer_by_code: { Args: { code: string }; Returns: string }
       ping: { Args: never; Returns: string }
-      shares_prayer_with: { Args: { other_user_id: string }; Returns: boolean }
+      save_prayer: {
+        Args: {
+          kind: string
+          planned_end_date: string
+          planned_start_date: string
+          points: Json
+          prayer_id: string
+          scriptures: Json
+          target_hours: number
+          title: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

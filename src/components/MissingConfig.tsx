@@ -2,8 +2,8 @@
 export function MissingConfig({ missing }: { missing: string[] }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-safe pt-safe pb-safe">
-      <p className="text-caption font-semibold tracking-[0.14em] text-gold uppercase">Setup needed</p>
-      <h1 className="mt-2 font-serif text-title text-ink">Stretch is not connected yet</h1>
+      <p className="eyebrow text-primary">Setup needed</p>
+      <h1 className="mt-2 text-title font-bold text-forest">Stretch is not connected yet</h1>
       <p className="mt-4 text-muted">
         The app cannot reach its database because {missing.length === 1 ? "this setting is" : "these settings are"}{" "}
         missing:

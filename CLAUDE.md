@@ -7,16 +7,31 @@ Mobile-first prayer PWA. Next.js App Router, TypeScript strict, Tailwind, Supaba
   Only NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SITE_URL.
 - Every schema change is a file in supabase/migrations first, then that same SQL is applied.
 - RLS is the gate. Every table has RLS on. New functions set an empty search_path.
+- Functions that only serve RLS policies live in the `private` schema, outside the API.
+  Only functions the app calls go in `public`. Use SECURITY DEFINER only where it is needed.
 - Regenerate src/types/database.ts from the hosted project (Supabase MCP generate_typescript_types)
   after any schema change. The hosted project is named Stretch; never touch another project.
 - No window.confirm or window.alert. Use src/components/ConfirmDialog.
+- Forms: use Button, TextField and FormError from src/components. A submit button stays disabled
+  until useHydrated() is true, and the form has method="post", so typed values never reach the URL.
+- Errors shown to people come from src/features/auth/messages.ts, never raw error text.
+- Prayers: all reads go through src/features/prayers/queries.ts and all writes through mutations.ts.
+  Saving a prayer with its points and scriptures is one call to the save_prayer database function.
+- Every screen that loads data has a loading.tsx skeleton in its own folder, an empty state,
+  and falls back to src/app/error.tsx. A prayer that is missing or not yours shows not-found.
+- Next keeps the previous screen in the document, hidden. In Playwright, prefer role locators,
+  which ignore hidden content, over getByText.
+- Screens inside the app are wrapped in ProfileGate (signed in and named). Read the signed-in
+  person with useProfile() in client components or getCurrentProfile() on the server.
 - Phone first: design at 390px. Tap targets >= 44px, inputs >= 16px, scripture >= 18px,
   safe-area padding. Light theme only. Theme tokens live in src/app/globals.css.
+  One typeface (Figtree). Headings use text-forest; small uppercase labels use the eyebrow utility;
+  main buttons use bg-brand. On wide screens the app stays in a centered phone-width column.
 - Work on a phase branch, never directly on main. Do not merge pull requests.
 
 ## Commands
 - `npm run dev`, `npm run build`, `npm run lint`, `npx tsc --noEmit`
-- `npm test` (Vitest), `npm run test:e2e` (Playwright), `npm run test:db` (SQL tests)
+- `npm test` (Vitest), `npm run test:e2e` (Playwright, needs `npm run db:start`), `npm run test:db` (SQL tests)
 - `npm run gen:types`
 
 ## Layout

@@ -3,8 +3,8 @@
 import { chromium } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 
-const PINE = "#2f4a3f";
-const VELLUM = "#f6f2ea";
+const DEEP = "#1f4d30";
+const LAVENDER = "#fbfcfb";
 
 // Maskable icons are cropped to a circle or rounded shape by Android,
 // so the letter stays inside the central safe zone.
@@ -18,8 +18,8 @@ const icons = [
 
 const html = (size, letter) => `<!doctype html>
 <html><body style="margin:0">
-<div style="width:${size}px;height:${size}px;background:${PINE};display:flex;align-items:center;justify-content:center">
-  <span style="font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:${Math.round(size * letter)}px;line-height:1;color:${VELLUM};transform:translateY(-3%)">S</span>
+<div style="width:${size}px;height:${size}px;background:${DEEP};display:flex;align-items:center;justify-content:center">
+  <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:${Math.round(size * letter)}px;line-height:1;color:${LAVENDER};transform:translateY(-3%)">S</span>
 </div>
 </body></html>`;
 

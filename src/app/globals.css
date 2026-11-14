@@ -2,50 +2,60 @@
 
 /*
  * Stretch theme tokens. Light theme only for now.
- * Calm, reverent, highly readable. Designed at 390px wide.
+ * Soft sage, forest green and deep blue: quiet, natural, unhurried. One friendly sans throughout.
+ * Designed at 390px wide; on wide screens the app sits in a centered phone-width column.
  */
 @theme {
   /* Color */
-  --color-vellum: #f6f2ea; /* page background */
-  --color-surface: #fffdf8; /* cards, bars, dialogs */
-  --color-ink: #2a2622; /* primary text */
-  --color-muted: #6f675c; /* secondary text */
-  --color-pine: #2f4a3f; /* primary actions, active tab */
-  --color-pine-deep: #233930; /* pressed state */
-  --color-gold: #b8893b; /* quiet accent */
-  --color-hairline: #e4dccd; /* borders and dividers */
-  --color-danger: #a33a2b; /* destructive actions */
+  --color-surround: #d3dad5; /* outside the app column, on wide screens */
+  --color-canvas: #e3e8e4; /* app background */
+  --color-surface: #fbfcfb; /* cards, bars, dialogs, fields */
+  --color-ink: #16291d; /* body text */
+  --color-forest: #1f4d30; /* headings */
+  --color-muted: #4f6257; /* secondary text */
+  --color-primary: #1a3e6f; /* links, active tab, focus */
+  --color-primary-deep: #122c50; /* pressed state */
+  --color-grad-from: #2f6b45; /* main buttons run from forest ... */
+  --color-grad-to: #2f6fa8; /* ... to blue */
+  --color-accent: #60b4e7; /* decorative highlights only, never small text */
+  --color-wash: #d6e0da; /* quiet fills: chips, selected rows */
+  --color-hairline: #c9d4cd; /* borders and dividers */
+  --color-danger: #b3261e; /* destructive actions and errors */
 
   /* Type scale. Inputs never go below 16px, scripture never below 18px. */
-  --text-caption: 0.8125rem;
-  --text-caption--line-height: 1.4;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.3;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.45;
   --text-body: 1rem;
-  --text-body--line-height: 1.55;
+  --text-body--line-height: 1.6;
   --text-scripture: 1.25rem;
-  --text-scripture--line-height: 1.6;
+  --text-scripture--line-height: 1.55;
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.3;
   --text-title: 1.875rem;
-  --text-title--line-height: 1.15;
+  --text-title--line-height: 1.2;
 
   /* Radii */
-  --radius-control: 0.75rem;
-  --radius-card: 1.125rem;
+  --radius-control: 1rem;
+  --radius-card: 1.5rem;
 
   /* Spacing */
   --spacing-tap: 2.75rem; /* 44px minimum tap target */
+  --spacing-field: 3.25rem; /* height of inputs and main buttons */
   --spacing-tabbar: 4rem; /* tab bar height, before the home-bar inset */
   --spacing-gutter: 1.25rem; /* page side padding */
 
-  --shadow-bar: 0 -1px 0 var(--color-hairline);
-  --shadow-dialog: 0 24px 60px -20px rgb(42 38 34 / 0.45);
+  --shadow-card: 0 1px 2px rgb(22 41 29 / 0.06), 0 8px 24px -16px rgb(22 41 29 / 0.25);
+  --shadow-dialog: 0 24px 60px -20px rgb(22 41 29 / 0.5);
 }
 
 @theme inline {
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
-  background: var(--color-vellum);
+  background: var(--color-surround);
   color: var(--color-ink);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -66,8 +76,22 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-pine);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* The small uppercase label used above titles and fields. */
+@utility eyebrow {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The forest-to-blue fill of main buttons. */
+@utility bg-brand {
+  background-image: linear-gradient(100deg, var(--color-grad-from), var(--color-grad-to));
 }
 
 /* Safe areas: iPhone notch at the top, home bar at the bottom. */
@@ -89,7 +113,7 @@ textarea {
 }
 
 dialog::backdrop {
-  background: rgb(42 38 34 / 0.45);
+  background: rgb(22 41 29 / 0.5);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -101,5 +125,15 @@ dialog::backdrop {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
   }
 }

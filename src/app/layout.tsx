@@ -1,21 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, Newsreader } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { MissingConfig } from "@/components/MissingConfig";
 import { missingSupabaseVars } from "@/lib/supabase/env";
 import "./globals.css";
 
-const hanken = Hanken_Grotesk({
-  variable: "--font-hanken",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-});
-
-const THEME_COLOR = "#f6f2ea";
+const THEME_COLOR = "#e3e8e4";
 
 export const metadata: Metadata = {
   title: { default: "Stretch", template: "%s · Stretch" },
@@ -44,10 +38,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${hanken.variable} ${newsreader.variable} h-full antialiased`}
+      className={`${figtree.variable} h-full antialiased`}
     >
-      <body className="min-h-dvh bg-vellum text-ink">
-        {missing.length > 0 ? <MissingConfig missing={missing} /> : children}
+      <body className="min-h-dvh text-ink">
+        {/* On wide screens the app stays in a centered phone-width column. */}
+        <div className="relative mx-auto min-h-dvh w-full max-w-md bg-canvas">
+          {missing.length > 0 ? <MissingConfig missing={missing} /> : children}
+        </div>
       </body>
     </html>
   );
