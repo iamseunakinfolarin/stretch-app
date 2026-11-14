@@ -46,3 +46,11 @@ export async function deleteAccount(page: Page) {
 export function formAlert(page: Page) {
   return page.locator("main [role=alert]");
 }
+
+/** Signs up a fresh person and takes them through onboarding to the Pray home screen. */
+export async function createAccount(page: Page, label: string, name: string): Promise<string> {
+  const email = uniqueEmail(label);
+  await signUp(page, email);
+  await finishWelcome(page, name);
+  return email;
+}

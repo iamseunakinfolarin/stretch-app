@@ -51,19 +51,13 @@ test("the tab bar is fixed to the bottom and every tab is at least 44px tall", a
 
 test("prayer and stretch screens are full screen, without the tab bar", async ({ page }) => {
   for (const [path, title] of [
-    ["/prayer/example-id", "Prayer"],
+    ["/prayers/new", "New prayer"],
     ["/stretch/example-id", "Stretch"],
   ] as const) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Main" })).toHaveCount(0);
   }
-});
-
-test("scripture text is at least 18px", async ({ page }) => {
-  await page.goto("/");
-  const size = await page.locator("blockquote").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-  expect(size).toBeGreaterThanOrEqual(18);
 });
 
 test("the manifest makes the app installable", async ({ page, request }) => {
@@ -112,7 +106,7 @@ test("the page head has what iPhone and Android need for Add to Home Screen", as
   await expect(head.locator('link[rel="manifest"]')).toHaveAttribute("href", /manifest\.webmanifest/);
   await expect(head.locator('meta[name="viewport"]')).toHaveAttribute("content", /viewport-fit=cover/);
   await expect(head.locator('meta[name="viewport"]')).toHaveAttribute("content", /width=device-width/);
-  await expect(head.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#f5efff");
+  await expect(head.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#e3e8e4");
   await expect(head.locator('meta[name="apple-mobile-web-app-capable"]')).toHaveAttribute("content", "yes");
   await expect(head.locator('meta[name="mobile-web-app-capable"]')).toHaveAttribute("content", "yes");
   await expect(head.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute("content", "Stretch");

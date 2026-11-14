@@ -5,7 +5,7 @@ import { deleteAccount, finishWelcome, formAlert, PASSWORD, signIn, signUp, uniq
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test("a signed-out visitor is sent to sign-in from every screen", async ({ page }) => {
-  for (const path of ["/", "/prayers", "/testimonies", "/profile", "/welcome", "/prayer/example-id", "/stretch/example-id"]) {
+  for (const path of ["/", "/prayers", "/testimonies", "/profile", "/welcome", "/prayers/new", "/prayers/10000000-0000-4000-a000-000000000001", "/stretch/example-id"]) {
     await page.goto(path);
     await expect(page, path).toHaveURL(/\/sign-in$/);
     await expect(page.getByRole("heading", { level: 1, name: "Welcome back" })).toBeVisible();
@@ -64,7 +64,7 @@ test("sign up, onboard, sign out, sign in again, delete the account", async ({ p
   await shot("welcome");
 
   // Onboarding can't be skipped.
-  for (const path of ["/", "/profile", "/prayer/example-id"]) {
+  for (const path of ["/", "/profile", "/prayers/new"]) {
     await page.goto(path);
     await expect(page, path).toHaveURL(/\/welcome$/);
   }
