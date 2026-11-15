@@ -1,12 +1,6 @@
-import type { Metadata } from "next";
-import { PageHeader } from "@/components/PageHeader";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Testimonies" };
-
+/** Testimonies are now called Thanksgiving. Old links and bookmarks land on the new page. */
 export default function TestimoniesPage() {
-  return (
-    <PageHeader eyebrow="Stretch" title="Testimonies">
-      What God has done will be recorded here.
-    </PageHeader>
-  );
+  redirect("/thanksgiving");
 }

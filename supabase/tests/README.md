@@ -51,6 +51,7 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `m_save_prayer.sql` | `save_prayer` saves a prayer with its points and scriptures all or nothing; a retry changes nothing; order is kept; limits of 20 and 10 hold; only the owner can save; another prayer's point cannot be taken over |
 | `n_stretch_rules.sql` | The database itself rejects a stretch under one minute (even a direct insert) and lets only the owner or a member of the prayer save one; there is no maximum length |
 | `o_commitment.sql` | Altars cannot have a target; weekly commitments are 0.5 to 168 hours; `save_prayer` stores them and restarts the week count only when the commitment changes; `get_my_commitment_status` works out the shortfall (Sunday weeks, no carry-over, extra hours pay it down, the current week never counts) from the caller's own stretches only |
+| `p_thanksgiving.sql` | Categories are private to their owner; a thanksgiving is its author's and, when shared, readable only by people in its linked prayer; names, titles and bodies are checked; links only to a prayer the author is in and a category they own; deleting a category or prayer keeps the thanksgiving; signed-out visitors have no access |
 
 ## Error codes the app can rely on
 

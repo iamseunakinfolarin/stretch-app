@@ -47,7 +47,7 @@ export function PrayerActions({ id, title, kind, archived }: Props) {
         </Button>
       ) : (
         <Button
-          variant="secondary"
+          variant="quiet"
           busy={working === "archive"}
           busyLabel="Archiving…"
           disabled={working !== null}

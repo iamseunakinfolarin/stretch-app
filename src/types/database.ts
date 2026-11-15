@@ -356,6 +356,104 @@ export type Database = {
           },
         ];
       };
+      thanksgiving_categories: {
+        Row: {
+          created_at: string;
+          glow: string;
+          id: string;
+          name: string;
+          owner_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          glow?: string;
+          id?: string;
+          name: string;
+          owner_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          glow?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thanksgiving_categories_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      thanksgivings: {
+        Row: {
+          author_id: string;
+          body: string;
+          category_id: string | null;
+          created_at: string;
+          happened_on: string;
+          id: string;
+          prayer_id: string | null;
+          title: string;
+          updated_at: string;
+          visibility: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          author_id: string;
+          body: string;
+          category_id?: string | null;
+          created_at?: string;
+          happened_on?: string;
+          id?: string;
+          prayer_id?: string | null;
+          title: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          category_id?: string | null;
+          created_at?: string;
+          happened_on?: string;
+          id?: string;
+          prayer_id?: string | null;
+          title?: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thanksgivings_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "thanksgivings_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "thanksgiving_categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "thanksgivings_prayer_id_fkey";
+            columns: ["prayer_id"];
+            isOneToOne: false;
+            referencedRelation: "prayers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

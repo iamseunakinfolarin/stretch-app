@@ -96,7 +96,7 @@ export function ProfileCard() {
         open={confirmingDelete}
         tone="danger"
         title="Delete your account?"
-        description="Your prayers, notes, testimonies and hours will be removed for good. Prayers you own are removed for everyone who joined them. This can't be undone."
+        description="Your prayers, notes, thanksgivings and hours will be removed for good. Prayers you own are removed for everyone who joined them. This can't be undone."
         confirmLabel={working === "delete" ? "Deleting…" : "Delete my account"}
         cancelLabel="Keep my account"
         busy={working === "delete"}

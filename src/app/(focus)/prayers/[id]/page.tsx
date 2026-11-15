@@ -8,6 +8,8 @@ import { PrayerActions } from "@/features/prayers/PrayerActions";
 import { KindChip } from "@/features/prayers/PrayerBits";
 import { getCommitmentStatus, getPrayer } from "@/features/prayers/queries";
 import { isArchived } from "@/features/prayers/types";
+import { ThanksgivingItem } from "@/features/thanksgiving/Bits";
+import { listThanksgivings } from "@/features/thanksgiving/queries";
 import { getTimeZone } from "@/lib/time-zone";
 
 export const metadata: Metadata = { title: "Prayer" };
@@ -25,6 +27,7 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
   const status = prayer.commitmentHours ? await getCommitmentStatus(prayer.id, await getTimeZone()) : null;
   const shortfall = status ? formatShortfall(status.shortfallSeconds) : null;
   const together = prayer.memberCount > 1;
+  const answers = await listThanksgivings({ prayerId: prayer.id });
 
   return (
     <>
@@ -126,6 +129,30 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
                     {scripture.translation ? <span className="font-normal text-muted"> · {scripture.translation}</span> : null}
                   </figcaption>
                 </figure>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section aria-labelledby="answers-heading" className="mt-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="answers-heading" className="text-heading font-bold text-forest">
+            Answers to this prayer
+          </h2>
+          {!archived ? (
+            <Link href={`/thanksgiving/new?prayer=${prayer.id}`} className="inline-flex min-h-field items-center px-2 font-semibold text-primary">
+              Add
+            </Link>
+          ) : null}
+        </div>
+        {answers.length === 0 ? (
+          <p className="mt-2 text-muted">No answers recorded yet.</p>
+        ) : (
+          <ul className="mt-3 flex flex-col gap-4">
+            {answers.map((item) => (
+              <li key={item.id}>
+                <ThanksgivingItem item={item} showCategory={false} />
               </li>
             ))}
           </ul>
