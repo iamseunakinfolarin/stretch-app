@@ -10,6 +10,8 @@ import { getSupabaseEnv } from "./env";
  */
 /** The screens a signed-out visitor may see. Everything else needs a session. */
 const AUTH_SCREENS = ["/sign-in", "/sign-up"];
+/** The page a confirmation email link lands on. It signs the person in, so it must be reachable signed out. */
+const CALLBACK = "/auth/callback";
 
 /** A redirect that still carries any refreshed session cookies to the browser. */
 function redirectTo(request: NextRequest, from: NextResponse, pathname: string) {
@@ -49,6 +51,13 @@ export async function updateSession(request: NextRequest) {
   const signedIn = Boolean(data?.claims?.sub);
 
   const { pathname } = request.nextUrl;
+  if (pathname === CALLBACK) return supabaseResponse;
+  // If Supabase's Site URL sends the email link to the home page, pass its code on to the callback.
+  if (pathname === "/" && request.nextUrl.searchParams.has("code")) {
+    const url = request.nextUrl.clone();
+    url.pathname = CALLBACK;
+    return NextResponse.redirect(url);
+  }
   const onAuthScreen = AUTH_SCREENS.includes(pathname);
 
   if (!signedIn && !onAuthScreen) return redirectTo(request, supabaseResponse, "/sign-in");
