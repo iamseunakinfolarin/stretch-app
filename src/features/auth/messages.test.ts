@@ -35,6 +35,7 @@ describe("authErrorMessage", () => {
 describe("dataErrorMessage", () => {
   it("maps database rule and permission errors", () => {
     expect(dataErrorMessage({ code: "23514" })).toMatch(/isn't allowed/);
+    expect(dataErrorMessage({ code: "23505" })).toMatch(/already have a category/);
     expect(dataErrorMessage({ code: "42501" })).toMatch(/can't change this/);
     expect(dataErrorMessage({ code: "28000" })).toMatch(/sign in again/);
     expect(dataErrorMessage({ code: "22023" })).toMatch(/20 prayer points/);

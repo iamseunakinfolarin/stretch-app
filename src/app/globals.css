@@ -139,3 +139,46 @@ dialog::backdrop {
     opacity: 0.55;
   }
 }
+
+/* Thanksgiving glow: a card that looks lit from inside, in the colour of its category.
+   Set --glow on the element (see glowStyle). A thin warm rim, a lit gradient and a soft bloom behind it.
+   Motion is slow and optional: it stops for anyone who prefers reduced motion. */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--glow) 50%, white);
+  background:
+    radial-gradient(120% 90% at 15% 0%, color-mix(in srgb, var(--glow) 38%, white) 0%, transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--glow) 14%, #fbfcfb) 0%, color-mix(in srgb, var(--glow) 6%, #fbfcfb) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    0 14px 34px -16px color-mix(in srgb, var(--glow) 70%, transparent);
+}
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(60% 60% at 50% 55%, color-mix(in srgb, var(--glow) 38%, transparent), transparent 75%);
+  filter: blur(14px);
+  opacity: 0.55;
+  animation: glow-breathe 7s ease-in-out infinite alternate;
+}
+.glow-lit::before {
+  animation: glow-lit 1.6s ease-out 1, glow-breathe 7s ease-in-out 1.6s infinite alternate;
+}
+@keyframes glow-breathe {
+  from { opacity: 0.4; transform: scale(0.98); }
+  to { opacity: 0.7; transform: scale(1.02); }
+}
+@keyframes glow-lit {
+  from { opacity: 1; transform: scale(1.06); }
+  to { opacity: 0.55; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-card::before,
+  .glow-lit::before {
+    animation: none;
+  }
+}

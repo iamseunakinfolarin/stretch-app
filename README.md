@@ -269,3 +269,14 @@ scripture and the time prayed.
 - Each prayer and altar has a profile page (`/prayers/[id]`). It shows the plan, **my hours** and, once others have joined, **group hours**. The only editing control on it is a small **Edit** link at the top for the owner; Archive and Delete live at the bottom of the edit page.
 - **Shortfall:** weeks start on Sunday in the person's time zone (sent by the browser in a `tz` cookie, UTC if missing). Hours short of the commitment over finished weeks show quietly in red. A short week does not raise the next week's target, and time prayed beyond a week's commitment pays the shortfall down. The current week never counts as short until it ends. It counts only the signed-in person's own hours (`get_my_commitment_status`).
 - A new prayer form starts blank every time, even after saving one and coming straight back.
+
+## Thanksgiving
+
+The old Testimonies tab is now **Thanksgiving**: a place to record every answer to prayer. Nothing is too small.
+
+- **Start documenting God's goodness** opens a full-screen form: a title, what God did, the day (today if left empty), an optional category and an optional prayer to link it to.
+- **Categories** are each person's own (Healing, Provision, Family...). Each has a glow colour. A new one is made inside the form. Deleting a category keeps its thanksgivings, which become "No category".
+- **Privacy:** private to the author by default. If a thanksgiving is linked to a prayer, it can be shared with the people in that prayer, and only them. Shared ones appear under "Answers to this prayer" on the prayer's profile.
+- **Pages:** `/thanksgiving` (categories and recent), `/thanksgiving/c/[id]` (a category), `/thanksgiving/[id]` (one thanksgiving, with a small Edit link for its author), `/thanksgiving/scroll` (one at a time, swipe up; an optional slow Play, off to begin with and unavailable with reduced motion). `/testimonies` redirects here.
+- **Look:** warm "lit from within" cards in the category's colour on the light theme (`.glow-card` in `globals.css`), with slow ambient motion that stops for reduced motion.
+- Two new tables: `thanksgiving_categories` and `thanksgivings`. The older `entries` table is unchanged.

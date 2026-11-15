@@ -39,8 +39,8 @@ const TABS: Tab[] = [
     ),
   },
   {
-    href: "/testimonies",
-    label: "Testimonies",
+    href: "/thanksgiving",
+    label: "Thanksgiving",
     icon: (
       <svg {...iconProps}>
         <path d="M12 3.5l2.5 5.3 5.7.7-4.2 4 1.1 5.7L12 16.4l-5.1 2.8L8 13.5l-4.2-4 5.7-.7L12 3.5Z" />

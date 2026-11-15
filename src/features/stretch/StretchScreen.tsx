@@ -159,7 +159,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
             Back to this prayer
           </Link>
           <Link href="/" className={buttonClass("secondary")}>
-            Pray home
+            Back to home
           </Link>
         </div>
       </>

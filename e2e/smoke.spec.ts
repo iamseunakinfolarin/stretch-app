@@ -8,7 +8,7 @@ test.use({ storageState: SESSION_FILE });
 const TABS = [
   { label: "Pray", path: "/", file: "pray" },
   { label: "My Prayers", path: "/prayers", file: "my-prayers" },
-  { label: "Testimonies", path: "/testimonies", file: "testimonies" },
+  { label: "Thanksgiving", path: "/thanksgiving", file: "thanksgiving", heading: "God's goodness" },
   { label: "Profile", path: "/profile", file: "profile" },
 ];
 
@@ -20,7 +20,7 @@ test("the four tabs show, and each one opens", async ({ page }, testInfo) => {
   for (const tab of TABS) {
     await nav.getByRole("link", { name: tab.label, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${tab.path}$`));
-    await expect(page.getByRole("heading", { level: 1, name: tab.label })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: tab.heading ?? tab.label })).toBeVisible();
     await expect(nav.getByRole("link", { name: tab.label, exact: true })).toHaveAttribute("aria-current", "page");
 
     if (tab.label === "Profile") {

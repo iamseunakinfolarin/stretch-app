@@ -60,6 +60,7 @@ export function dataErrorMessage(error: unknown): string {
   if (!error || typeof error !== "object") return FALLBACK;
   const e = error as ErrorLike;
   if (isNetworkError(e)) return OFFLINE;
+  if (e.code === "23505") return "You already have a category with that name.";
   if (e.code === "23514") return "That value isn't allowed. Check it and try again.";
   if (e.code === "22023") return "That's more than a prayer can hold: up to 20 prayer points and 10 key scriptures.";
   if (e.code === "28000") return "You need to sign in again to do that.";
