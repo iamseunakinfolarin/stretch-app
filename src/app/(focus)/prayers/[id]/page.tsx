@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
 import { buttonClass } from "@/components/Button";
-import { formatHours, formatPlan, targetProgress } from "@/features/prayers/format";
+import { formatHours, formatPlan, formatShortfall, targetProgress } from "@/features/prayers/format";
 import { PrayerActions } from "@/features/prayers/PrayerActions";
 import { KindChip } from "@/features/prayers/PrayerBits";
-import { getPrayer } from "@/features/prayers/queries";
+import { getCommitmentStatus, getPrayer } from "@/features/prayers/queries";
 import { isArchived } from "@/features/prayers/types";
+import { getTimeZone } from "@/lib/time-zone";
 
 export const metadata: Metadata = { title: "Prayer" };
 
+/** The profile of one prayer or altar: its plan, the hours prayed, its points and its scriptures. */
 export default async function PrayerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const prayer = await getPrayer(id);
@@ -20,10 +22,20 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
   const archived = isArchived(prayer);
   const plan = formatPlan(prayer);
   const progress = targetProgress(prayer.mySeconds, prayer.targetHours);
+  const status = prayer.commitmentHours ? await getCommitmentStatus(prayer.id, await getTimeZone()) : null;
+  const shortfall = status ? formatShortfall(status.shortfallSeconds) : null;
+  const together = prayer.memberCount > 1;
 
   return (
     <>
-      <BackLink href="/prayers">My Prayers</BackLink>
+      <div className="flex items-center justify-between gap-3">
+        <BackLink href="/prayers">My Prayers</BackLink>
+        {prayer.isOwner && !archived ? (
+          <Link href={`/prayers/${prayer.id}/edit`} className="inline-flex min-h-field items-center px-2 font-semibold text-primary">
+            Edit
+          </Link>
+        ) : null}
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <KindChip kind={prayer.kind} />
@@ -41,8 +53,18 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
       ) : null}
 
       <section aria-label="Hours prayed" className="mt-6 rounded-card border border-hairline bg-surface p-5 shadow-card">
-        <p className="eyebrow text-muted">Hours so far</p>
-        <p className="mt-1 text-title font-bold text-forest">{formatHours(prayer.mySeconds)}</p>
+        <div className={together ? "grid grid-cols-2 gap-4" : undefined}>
+          <div>
+            <p className="eyebrow text-muted">{together ? "My hours" : "Hours so far"}</p>
+            <p className="mt-1 text-title font-bold text-forest">{formatHours(prayer.mySeconds)}</p>
+          </div>
+          {together ? (
+            <div>
+              <p className="eyebrow text-muted">Group hours</p>
+              <p className="mt-1 text-title font-bold text-forest">{formatHours(prayer.groupSeconds)}</p>
+            </div>
+          ) : null}
+        </div>
         {prayer.targetHours && progress !== null ? (
           <>
             <div
@@ -59,12 +81,10 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
               {progress}% of your {prayer.targetHours.toLocaleString("en")} hour target
             </p>
           </>
-        ) : (
+        ) : prayer.mySeconds === 0 ? (
           <p className="mt-1 text-caption text-muted">Each stretch you pray will add to this.</p>
-        )}
-        {prayer.groupSeconds > prayer.mySeconds ? (
-          <p className="mt-2 text-caption text-muted">Together: {formatHours(prayer.groupSeconds)}</p>
         ) : null}
+        {shortfall ? <p className="mt-2 text-caption text-danger">{shortfall}</p> : null}
       </section>
 
       <section aria-labelledby="points-heading" className="mt-8">
@@ -72,7 +92,7 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
           Prayer points
         </h2>
         {prayer.points.length === 0 ? (
-          <p className="mt-2 text-muted">No prayer points yet.{archived ? "" : " Add some with Edit."}</p>
+          <p className="mt-2 text-muted">No prayer points yet.{prayer.isOwner && !archived ? " Add some with Edit." : ""}</p>
         ) : (
           <ol className="mt-3 flex flex-col gap-2">
             {prayer.points.map((point, index) => (
@@ -92,7 +112,7 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
           Key scriptures
         </h2>
         {prayer.scriptures.length === 0 ? (
-          <p className="mt-2 text-muted">No key scriptures yet.{archived ? "" : " Add some with Edit."}</p>
+          <p className="mt-2 text-muted">No key scriptures yet.{prayer.isOwner && !archived ? " Add some with Edit." : ""}</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-3">
             {prayer.scriptures.map((scripture) => (
@@ -112,9 +132,9 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
         )}
       </section>
 
-      {prayer.isOwner ? (
+      {prayer.isOwner && archived ? (
         <div className="mt-10">
-          <PrayerActions id={prayer.id} title={prayer.title} kind={prayer.kind} archived={archived} />
+          <PrayerActions id={prayer.id} title={prayer.title} kind={prayer.kind} archived />
         </div>
       ) : null}
     </>

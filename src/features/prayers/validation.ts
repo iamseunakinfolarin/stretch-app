@@ -11,6 +11,8 @@ export const VERSE_MAX = 1000;
 export const TRANSLATION_MAX = 20;
 export const SCRIPTURES_LIMIT = 10;
 export const TARGET_HOURS_MAX = 10000;
+export const COMMITMENT_MIN = 0.5;
+export const COMMITMENT_MAX = 168;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,6 +38,17 @@ export function validateTargetHours(value: string): string | null {
   const hours = Number(text);
   if (hours < 1) return "Enter at least 1 hour.";
   if (hours > TARGET_HOURS_MAX) return `Enter ${TARGET_HOURS_MAX.toLocaleString("en")} hours or fewer.`;
+  return null;
+}
+
+/** An empty commitment is fine. Hours a week, in halves or tenths: 5, 2.5, 0.5. */
+export function validateCommitmentHours(value: string): string | null {
+  const text = value.trim();
+  if (!text) return null;
+  if (!/^\d+(\.\d)?$/.test(text)) return "Enter hours a week, like 5 or 2.5.";
+  const hours = Number(text);
+  if (hours < COMMITMENT_MIN) return "Enter at least half an hour a week.";
+  if (hours > COMMITMENT_MAX) return `A week has ${COMMITMENT_MAX} hours. Enter fewer.`;
   return null;
 }
 
@@ -85,7 +98,9 @@ export function normalizeDraft(draft: PrayerDraft): PrayerDraft {
   return {
     kind: draft.kind,
     title: draft.title.trim().replace(/\s+/g, " "),
-    targetHours: draft.targetHours.trim(),
+    // An altar has a weekly commitment and no target.
+    targetHours: isAltar ? "" : draft.targetHours.trim(),
+    commitmentHours: draft.commitmentHours.trim(),
     plannedStartDate: isAltar ? "" : draft.plannedStartDate,
     plannedEndDate: isAltar ? "" : draft.plannedEndDate,
     points: draft.points.filter((p) => !isBlankPoint(p)).map((p) => ({ id: p.id, body: p.body.trim() })),
@@ -98,6 +113,7 @@ export function normalizeDraft(draft: PrayerDraft): PrayerDraft {
 export type DraftErrors = {
   title?: string;
   targetHours?: string;
+  commitmentHours?: string;
   dates?: string;
   /** Too many points or scriptures. */
   points?: string;
@@ -114,6 +130,8 @@ export function validateDraft(draft: PrayerDraft): { ok: boolean; errors: DraftE
   if (title) errors.title = title;
   const target = validateTargetHours(draft.targetHours);
   if (target) errors.targetHours = target;
+  const commitment = validateCommitmentHours(draft.commitmentHours);
+  if (commitment) errors.commitmentHours = commitment;
   const dates = validateDates(draft.plannedStartDate, draft.plannedEndDate);
   if (dates) errors.dates = dates;
 
@@ -132,6 +150,7 @@ export function validateDraft(draft: PrayerDraft): { ok: boolean; errors: DraftE
   const ok =
     !errors.title &&
     !errors.targetHours &&
+    !errors.commitmentHours &&
     !errors.dates &&
     !errors.points &&
     !errors.scriptures &&

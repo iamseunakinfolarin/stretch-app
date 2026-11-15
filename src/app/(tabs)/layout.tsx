@@ -1,5 +1,6 @@
 import { TabBar } from "@/components/TabBar";
 import { ListSkeleton } from "@/features/prayers/Skeletons";
+import { TimeZoneCookie } from "@/lib/TimeZoneCookie";
 import { PendingStretchSync } from "@/features/stretch/PendingStretchSync";
 import { ProfileGate } from "@/features/profile/ProfileGate";
 
@@ -13,6 +14,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
       <main className="mx-auto w-full max-w-md px-safe pt-safe pb-safe-tabbar">
         <ProfileGate fallback={<ListSkeleton />}>
           <PendingStretchSync />
+        <TimeZoneCookie />
           {children}
         </ProfileGate>
       </main>

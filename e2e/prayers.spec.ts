@@ -74,6 +74,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   // Create a prayer with a plan, two points and a scripture.
   await page.getByLabel("Title").fill("For Mum's recovery");
   await page.getByLabel("Target hours").fill("40");
+  await page.getByLabel("Prayer commitment hours (a week)").fill("5");
   await page.getByLabel("Start date").fill("2026-12-01");
   await page.getByLabel("End date").fill("2026-12-31");
   await addPoint(page, "Strength for each day of treatment");
@@ -85,7 +86,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await expect(page).toHaveURL(UUID_URL);
   const mumUrl = page.url();
   await expect(page.getByRole("heading", { level: 1, name: "For Mum's recovery" })).toBeVisible();
-  await expect(page.getByText("40h target · 1 Dec 2026 to 31 Dec 2026")).toBeVisible();
+  await expect(page.getByText("5 hours a week · 40h target · 1 Dec 2026 to 31 Dec 2026")).toBeVisible();
   const hours = page.getByRole("region", { name: "Hours prayed" });
   await expect(hours).toContainText("0h");
   await expect(hours).toContainText("0% of your 40 hour target");
@@ -98,13 +99,14 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   expect(verseSize).toBeGreaterThanOrEqual(18);
   await shot("prayer-detail");
 
-  // Create an altar. An altar has no dates, only an hours target.
+  // Create an altar. An altar has no dates and no target, only a weekly commitment.
   await page.goto("/prayers/new");
   await page.getByLabel("Title").fill("Morning watch");
   await page.getByText("A long-term prayer you keep returning to.").click();
   await expect(page.getByLabel("Start date")).toHaveCount(0);
   await expect(page.getByText("An altar has no end date.")).toBeVisible();
-  await page.getByLabel("Target hours").fill("100");
+  await expect(page.getByLabel("Target hours")).toHaveCount(0);
+  await page.getByLabel("Prayer commitment (hours a week)").fill("5");
   await addPoint(page, "Thank God for today");
   await addPoint(page, "Pray for the family");
   await addPoint(page, "Listen");
@@ -112,7 +114,8 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await page.getByRole("button", { name: "Create altar" }).click();
   await expect(page).toHaveURL(UUID_URL);
   await expect(page.getByRole("heading", { level: 1, name: "Morning watch" })).toBeVisible();
-  await expect(page.getByText("100h target")).toBeVisible();
+  await expect(page.getByText("5 hours a week", { exact: true })).toBeVisible();
+  await expect(page.getByText("target").filter({ visible: true })).toHaveCount(0);
   // Next keeps the page you came from in the document, hidden, so this looks only at what is showing.
   await expect(page.getByText("Altar", { exact: true }).filter({ visible: true })).toHaveCount(1);
 
@@ -124,6 +127,13 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   const davidUrl = page.url();
   await expect(page.getByText("No plan set.")).toBeVisible();
   await expect(page.getByText("No prayer points yet.")).toBeVisible();
+  // The prayer page has no Edit, Archive or Delete buttons of its own, only an Edit link at the top.
+  await expect(page.getByRole("button", { name: "Delete", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Archive", exact: true })).toHaveCount(0);
+  // Starting another prayer from here begins with a blank form, not with what was typed before.
+  await page.getByRole("link", { name: "My Prayers" }).click();
+  await page.getByRole("link", { name: "New prayer" }).click();
+  await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue("");
 
   // Pray home shows a tile for each, altars first.
   await page.goto("/");
@@ -174,7 +184,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
 
   await expect(page).toHaveURL(mumUrl);
   await expect(page.getByRole("heading", { level: 1, name: "For Mum's full recovery" })).toBeVisible();
-  await expect(page.getByText("60h target · 1 Dec 2026 to 31 Dec 2026")).toBeVisible();
+  await expect(page.getByText("5 hours a week · 60h target · 1 Dec 2026 to 31 Dec 2026")).toBeVisible();
   const expectEdited = async () => {
     const list = page.getByRole("list").filter({ has: page.getByText("Wisdom for her doctors") });
     await expect(list.getByRole("listitem")).toHaveText([
@@ -201,8 +211,11 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await expect(page).toHaveURL(mumUrl);
   await expect(page.getByRole("heading", { level: 1, name: "For Mum's full recovery" })).toBeVisible();
 
-  // Archive: it leaves the active lists but keeps everything.
-  await page.getByRole("button", { name: "Archive" }).click();
+  // Archive, from the edit page: it leaves the active lists but keeps everything.
+  await page.getByRole("link", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await expect(page).toHaveURL(/\/prayers$/);
+  await page.goto(mumUrl);
   await expect(page.getByText("Archived", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Reactivate" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Edit" })).toHaveCount(0);
@@ -222,19 +235,19 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
   expect(await listCounts(page)).toEqual(["Prayers (2)", "Altars (1)", "Archived (0)"]);
 
-  // Delete asks first, and "Keep prayer" really keeps it.
-  await page.goto(davidUrl);
-  await page.getByRole("button", { name: "Delete" }).click();
+  // Delete, from the edit page, asks first, and "Keep prayer" really keeps it.
+  await page.goto(`${davidUrl}/edit`);
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
   const confirm = page.getByRole("dialog", { name: "Delete this prayer?" });
   await expect(confirm).toContainText("A new job for David");
   await page.screenshot({ path: `docs/screenshots/${testInfo.project.name}-delete-confirmation.png` });
   await confirm.getByRole("button", { name: "Keep prayer" }).click();
   await expect(confirm).toBeHidden();
   await page.reload();
-  await expect(page.getByRole("heading", { level: 1, name: "A new job for David" })).toBeVisible();
+  await expect(page.getByLabel("Title")).toHaveValue("A new job for David");
 
   // Confirming removes it, and its address stops working.
-  await page.getByRole("button", { name: "Delete" }).click();
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
   await confirm.getByRole("button", { name: "Delete prayer" }).click();
   await expect(page).toHaveURL(/\/prayers$/);
   expect(await listCounts(page)).toEqual(["Prayers (1)", "Altars (1)", "Archived (0)"]);

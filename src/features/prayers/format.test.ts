@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countLabel, formatDate, formatHours, formatPlan, kindLabel, targetProgress } from "./format";
+import { countLabel, formatCommitment, formatDate, formatShortfall, formatHours, formatPlan, kindLabel, targetProgress } from "./format";
 
 describe("formatHours", () => {
   it.each([
@@ -38,6 +38,24 @@ describe("formatPlan", () => {
     expect(formatPlan({ targetHours: 40, plannedStartDate: "2026-12-01", plannedEndDate: "2026-12-31" })).toBe(
       "40h target · 1 Dec 2026 to 31 Dec 2026",
     );
+  });
+});
+
+describe("commitment", () => {
+  it("says hours a week", () => {
+    expect(formatCommitment(5)).toBe("5 hours a week");
+    expect(formatCommitment(2.5)).toBe("2.5 hours a week");
+    expect(formatCommitment(1)).toBe("1 hour a week");
+  });
+  it("puts the commitment first in a plan", () => {
+    const none = { targetHours: null, plannedStartDate: null, plannedEndDate: null };
+    expect(formatPlan({ ...none, commitmentHours: 5 })).toBe("5 hours a week");
+    expect(formatPlan({ ...none, targetHours: 40, commitmentHours: 5 })).toBe("5 hours a week · 40h target");
+  });
+  it("mentions a shortfall quietly, and not at all when there is none", () => {
+    expect(formatShortfall(0)).toBeNull();
+    expect(formatShortfall(59)).toBeNull();
+    expect(formatShortfall(9000)).toBe("2h 30m behind your weekly commitment");
   });
 });
 

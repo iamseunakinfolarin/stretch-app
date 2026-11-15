@@ -13,6 +13,7 @@ export function toSavePrayerArgs(id: string, draft: PrayerDraft) {
     title: draft.title,
     // The generated types mark these as required, but the function accepts null for "no plan".
     target_hours: (draft.targetHours ? Number(draft.targetHours) : null) as number,
+    commitment_hours: draft.commitmentHours ? Number(draft.commitmentHours) : undefined,
     planned_start_date: (draft.plannedStartDate || null) as string,
     planned_end_date: (draft.plannedEndDate || null) as string,
     points: draft.points.map((point) => ({ id: point.id, body: point.body })) as Json,

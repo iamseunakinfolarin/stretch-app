@@ -19,6 +19,7 @@ create function tests.id(p_what text) returns uuid language sql immutable as $$
     when 'prayer'            then '10000000-0000-4000-a000-000000000001'::uuid  -- owned by owner, member joined
     when 'outsider_prayer'   then '10000000-0000-4000-a000-000000000002'::uuid  -- owned by outsider
     when 'new_prayer'        then '10000000-0000-4000-a000-000000000003'::uuid
+    when 'new_altar'         then '10000000-0000-4000-a000-000000000004'::uuid
     when 'owner_session'     then '20000000-0000-4000-a000-000000000001'::uuid
     when 'member_session'    then '20000000-0000-4000-a000-000000000002'::uuid
     when 'new_session'       then '20000000-0000-4000-a000-000000000003'::uuid
