@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, buttonClass } from "@/components/Button";
+import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormError } from "@/components/FormError";
 import { dataErrorMessage } from "@/features/auth/messages";
@@ -12,7 +11,7 @@ import type { PrayerKind } from "./types";
 
 type Props = { id: string; title: string; kind: PrayerKind; archived: boolean };
 
-/** Edit, Archive or Reactivate, and Delete, for the owner of a prayer. */
+/** Archive or Reactivate, and Delete, for the owner of a prayer. Editing lives on the edit page. */
 export function PrayerActions({ id, title, kind, archived }: Props) {
   const router = useRouter();
   const [working, setWorking] = useState<"archive" | "reactivate" | "delete" | null>(null);
@@ -47,20 +46,15 @@ export function PrayerActions({ id, title, kind, archived }: Props) {
           Reactivate
         </Button>
       ) : (
-        <>
-          <Link href={`/prayers/${id}/edit`} className={buttonClass("primary")}>
-            Edit
-          </Link>
-          <Button
-            variant="secondary"
-            busy={working === "archive"}
-            busyLabel="Archiving…"
-            disabled={working !== null}
-            onClick={() => run("archive", () => archivePrayer(id), () => router.refresh())}
-          >
-            Archive
-          </Button>
-        </>
+        <Button
+          variant="secondary"
+          busy={working === "archive"}
+          busyLabel="Archiving…"
+          disabled={working !== null}
+          onClick={() => run("archive", () => archivePrayer(id), () => { router.replace("/prayers"); router.refresh(); })}
+        >
+          Archive
+        </Button>
       )}
       <Button variant="quiet-danger" disabled={working !== null} onClick={() => setConfirmingDelete(true)}>
         Delete

@@ -30,7 +30,8 @@ import { archivePrayer, deletePrayer, reactivatePrayer, savePrayer, toSavePrayer
 const draft: PrayerDraft = {
   kind: "altar",
   title: "Morning watch",
-  targetHours: "100",
+  targetHours: "",
+  commitmentHours: "5",
   plannedStartDate: "",
   plannedEndDate: "",
   points: [
@@ -51,7 +52,8 @@ describe("toSavePrayerArgs", () => {
       prayer_id: "p1",
       kind: "altar",
       title: "Morning watch",
-      target_hours: 100,
+      target_hours: null,
+      commitment_hours: 5,
       planned_start_date: null,
       planned_end_date: null,
       points: [

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
+import { PrayerActions } from "@/features/prayers/PrayerActions";
 import { PrayerForm } from "@/features/prayers/PrayerForm";
 import { getPrayer } from "@/features/prayers/queries";
 import { isArchived } from "@/features/prayers/types";
@@ -25,12 +26,16 @@ export default async function EditPrayerPage({ params }: { params: Promise<{ id:
           kind: prayer.kind,
           title: prayer.title,
           targetHours: prayer.targetHours ? String(prayer.targetHours) : "",
+          commitmentHours: prayer.commitmentHours ? String(prayer.commitmentHours) : "",
           plannedStartDate: prayer.plannedStartDate ?? "",
           plannedEndDate: prayer.plannedEndDate ?? "",
           points: prayer.points,
           scriptures: prayer.scriptures,
         }}
       />
+      <div className="mt-10 mb-6">
+        <PrayerActions id={prayer.id} title={prayer.title} kind={prayer.kind} archived={false} />
+      </div>
     </>
   );
 }

@@ -18,11 +18,12 @@ export function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(date);
 }
 
-export type Plan = { targetHours: number | null; plannedStartDate: string | null; plannedEndDate: string | null };
+export type Plan = { targetHours: number | null; commitmentHours?: number | null; plannedStartDate: string | null; plannedEndDate: string | null };
 
-/** "40h target · 1 Dec 2026 to 31 Dec 2026", or null when there is no plan. */
+/** "5 hours a week · 40h target · 1 Dec 2026 to 31 Dec 2026", or null when there is no plan. */
 export function formatPlan(plan: Plan): string | null {
   const parts: string[] = [];
+  if (plan.commitmentHours) parts.push(formatCommitment(plan.commitmentHours));
   if (plan.targetHours) parts.push(`${plan.targetHours.toLocaleString("en")}h target`);
   if (plan.plannedStartDate && plan.plannedEndDate) {
     parts.push(`${formatDate(plan.plannedStartDate)} to ${formatDate(plan.plannedEndDate)}`);
@@ -44,4 +45,16 @@ export function countLabel(count: number, singular: string, plural = `${singular
 
 export function kindLabel(kind: PrayerKind): string {
   return kind === "altar" ? "Altar" : "Prayer";
+}
+
+/** "5 hours a week", "2.5 hours a week", "1 hour a week". */
+export function formatCommitment(hours: number): string {
+  const text = Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+  return `${text} ${hours === 1 ? "hour" : "hours"} a week`;
+}
+
+/** A quiet note for someone behind their commitment, or null when they are not. */
+export function formatShortfall(seconds: number): string | null {
+  if (seconds < 60) return null;
+  return `${formatHours(seconds)} behind your weekly commitment`;
 }

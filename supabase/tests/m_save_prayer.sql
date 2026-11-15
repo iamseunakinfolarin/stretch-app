@@ -3,13 +3,13 @@
 select tests.act_as('outsider');
 
 select tests.remember('create', $$select public.save_prayer(
-  tests.id('new_prayer'), 'altar', '  Morning watch  ', 100, null, null,
+  tests.id('new_prayer'), 'altar', '  Morning watch  ', null, null, null,
   '[{"id":"40000000-0000-4000-a000-0000000000a1","body":"Thank God for today"},
     {"id":"40000000-0000-4000-a000-0000000000a2","body":"  Pray for the family  "}]',
   '[{"id":"50000000-0000-4000-a000-0000000000b1","reference":"Psalm 5:3","verse_text":"My voice shalt thou hear in the morning, O LORD","translation":"KJV"},
     {"id":"50000000-0000-4000-a000-0000000000b2","reference":"Mark 1:35","verse_text":"  ","translation":""}]')$$);
 select tests.expect_value(tests.recall('create'), tests.id('new_prayer')::text, 'one call creates the altar and returns its id');
-select tests.expect_count($$select 1 from public.prayers where id = tests.id('new_prayer') and kind = 'altar' and status = 'active' and title = 'Morning watch' and target_hours = 100 and owner_id = tests.uid('outsider')$$, 1, 'the altar is stored, with its title trimmed and its plan');
+select tests.expect_count($$select 1 from public.prayers where id = tests.id('new_prayer') and kind = 'altar' and status = 'active' and title = 'Morning watch' and target_hours is null and owner_id = tests.uid('outsider')$$, 1, 'the altar is stored, with its title trimmed and its plan');
 select tests.expect_count($$select 1 from public.prayer_members where prayer_id = tests.id('new_prayer') and user_id = tests.uid('outsider') and role = 'owner'$$, 1, 'the owner membership was created');
 select tests.expect_value($$select string_agg(body, ' | ' order by position) from public.prayer_points where prayer_id = tests.id('new_prayer')$$, 'Thank God for today | Pray for the family', 'both points are stored in order, trimmed');
 select tests.expect_value($$select string_agg(reference, ' | ' order by position) from public.scriptures where prayer_id = tests.id('new_prayer')$$, 'Psalm 5:3 | Mark 1:35', 'both scriptures are stored in order');
@@ -23,13 +23,13 @@ select tests.expect_count($$select 1 from public.scriptures where prayer_id = te
 
 -- Edit: rename, set a different plan, reorder the points, add one, edit one. The type cannot change.
 select tests.expect_value($$select public.save_prayer(
-  tests.id('new_prayer'), 'prayer', 'The morning watch', 250, null, null,
+  tests.id('new_prayer'), 'prayer', 'The morning watch', null, null, null,
   '[{"id":"40000000-0000-4000-a000-0000000000a2","body":"Pray for the whole family"},
     {"id":"40000000-0000-4000-a000-0000000000a1","body":"Thank God for today"},
     {"id":"40000000-0000-4000-a000-0000000000a3","body":"Listen"}]',
   '[{"id":"50000000-0000-4000-a000-0000000000b1","reference":"Psalm 5:3","verse_text":"My voice shalt thou hear in the morning, O LORD","translation":"KJV"},
-    {"id":"50000000-0000-4000-a000-0000000000b2","reference":"Mark 1:35","verse_text":"And in the morning, rising up a great while before day","translation":"KJV"}]')$$, tests.id('new_prayer')::text, 'an edit saves');
-select tests.expect_count($$select 1 from public.prayers where id = tests.id('new_prayer') and title = 'The morning watch' and target_hours = 250 and kind = 'altar'$$, 1, 'title and plan changed; the type stayed an altar');
+    {"id":"50000000-0000-4000-a000-0000000000b2","reference":"Mark 1:35","verse_text":"And in the morning, rising up a great while before day","translation":"KJV"}]', 7)$$, tests.id('new_prayer')::text, 'an edit saves');
+select tests.expect_count($$select 1 from public.prayers where id = tests.id('new_prayer') and title = 'The morning watch' and target_hours is null and commitment_hours = 7 and kind = 'altar'$$, 1, 'title and commitment changed; the type stayed an altar');
 select tests.expect_value($$select string_agg(body, ' | ' order by position) from public.prayer_points where prayer_id = tests.id('new_prayer')$$, 'Pray for the whole family | Thank God for today | Listen', 'points are reordered, edited and added');
 select tests.expect_value($$select string_agg(position::text, ',' order by position) from public.prayer_points where prayer_id = tests.id('new_prayer')$$, '0,1,2', 'positions run 0, 1, 2');
 select tests.expect_count($$select 1 from public.scriptures where id = '50000000-0000-4000-a000-0000000000b2' and verse_text like 'And in the morning%' and translation = 'KJV'$$, 1, 'a scripture was edited in place');
@@ -56,11 +56,11 @@ select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'a
 select tests.expect_error($$select public.save_prayer(gen_random_uuid(), 'vigil', 'Unknown type', null, null, null, '[]', '[]')$$, '23514', 'an unknown type is refused');
 select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'Bad plan', 0, null, null, '[]', '[]')$$, '23514', 'a target of 0 hours is refused');
 select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'Bad plan', null, '2026-12-31', '2026-12-01', '[]', '[]')$$, '23514', 'an end date before the start date is refused');
-select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', 5, null, null,
+select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', null, null, null,
   '[{"id":"40000000-0000-4000-a000-0000000000a3","body":"Listen closely"},{"id":"40000000-0000-4000-a000-0000000000a4","body":""}]', '[]')$$, '23514', 'an empty prayer point is refused');
-select tests.expect_error(format($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', 5, null, null, %L, '[]')$$,
+select tests.expect_error(format($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', null, null, null, %L, '[]')$$,
   jsonb_build_array(jsonb_build_object('id', gen_random_uuid(), 'body', repeat('x', 301)))), '23514', 'a 301 character prayer point is refused');
-select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', 5, null, null, '[]',
+select tests.expect_error($$select public.save_prayer(tests.id('new_prayer'), 'altar', 'A changed title', null, null, null, '[]',
   '[{"id":"50000000-0000-4000-a000-0000000000b9","verse_text":"No reference"}]')$$, '23502', 'a scripture without a reference is refused');
 select tests.expect_count($$select 1 from public.prayers where id = tests.id('new_prayer') and title = 'The morning watch' and target_hours is null$$, 1, 'after all those refusals the prayer is exactly as it was');
 select tests.expect_value($$select string_agg(body, ' | ' order by position) from public.prayer_points where prayer_id = tests.id('new_prayer')$$, 'Listen', 'and so are its points: a refused save is all or nothing');

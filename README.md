@@ -262,3 +262,10 @@ scripture and the time prayed.
 - **Ending** saves the time through `complete_session`. Under a minute is not saved. A stretch has no maximum length.
 - **Dropped connection:** a running stretch and any finished one not yet saved are kept in the phone's `localStorage`, and sent again when the app opens or comes back online. The id is chosen when the stretch starts, so sending twice saves once.
 - No database change was needed for this phase.
+
+## Prayer commitment and the profile page
+
+- An **altar** has a **prayer commitment** in hours a week and no target. A **prayer** keeps its **target hours** and also has a **prayer commitment** in hours a week. Both are optional.
+- Each prayer and altar has a profile page (`/prayers/[id]`). It shows the plan, **my hours** and, once others have joined, **group hours**. The only editing control on it is a small **Edit** link at the top for the owner; Archive and Delete live at the bottom of the edit page.
+- **Shortfall:** weeks start on Sunday in the person's time zone (sent by the browser in a `tz` cookie, UTC if missing). Hours short of the commitment over finished weeks show quietly in red. A short week does not raise the next week's target, and time prayed beyond a week's commitment pays the shortfall down. The current week never counts as short until it ends. It counts only the signed-in person's own hours (`get_my_commitment_status`).
+- A new prayer form starts blank every time, even after saving one and coming straight back.

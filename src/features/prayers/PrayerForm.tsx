@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormError } from "@/components/FormError";
@@ -37,6 +37,7 @@ export const EMPTY_DRAFT: PrayerDraft = {
   kind: "prayer",
   title: "",
   targetHours: "",
+  commitmentHours: "",
   plannedStartDate: "",
   plannedEndDate: "",
   points: [],
@@ -87,6 +88,20 @@ export function PrayerForm({ prayerId, initial = EMPTY_DRAFT }: Props) {
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   // Chosen on the first save and kept, so a retry updates the same prayer instead of making a second.
   const savedId = useRef<string | undefined>(prayerId);
+
+  // Next keeps the previous screen alive, hidden. When this screen is hidden, a new prayer's form is
+  // cleared, so coming back to "New prayer" starts blank and not with what was typed last time.
+  useEffect(() => {
+    if (editing) return;
+    return () => {
+      setDraft(initial);
+      setErrors(NO_ERRORS);
+      setFormError(null);
+      setBusy(false);
+      savedId.current = undefined;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const backTo = editing ? `/prayers/${prayerId}` : "/prayers";
   const dirty = JSON.stringify(draft) !== JSON.stringify(initial);
@@ -173,18 +188,36 @@ export function PrayerForm({ prayerId, initial = EMPTY_DRAFT }: Props) {
       </fieldset>
 
       <fieldset>
-        <legend className="text-heading font-bold text-forest">Plan</legend>
-        <p className="mt-1 text-caption text-muted">Optional. Set a target to pray towards, or leave it open.</p>
+        <legend className="text-heading font-bold text-forest">{draft.kind === "altar" ? "Prayer commitment" : "Plan"}</legend>
+        <p className="mt-1 text-caption text-muted">
+          {draft.kind === "altar"
+            ? "Optional. The hours you want to give this altar each week."
+            : "Optional. Set a target to pray towards, and the hours you will give it each week."}
+        </p>
         <div className="mt-4 flex flex-col gap-5">
+          {draft.kind === "prayer" ? (
+            <TextField
+              label="Target hours"
+              name="target_hours"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={draft.targetHours}
+              onChange={(e) => set({ targetHours: e.target.value })}
+              error={errors.targetHours}
+              hint="The total hours you want to reach."
+              placeholder="For example 40"
+              autoComplete="off"
+            />
+          ) : null}
           <TextField
-            label="Target hours"
-            name="target_hours"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={draft.targetHours}
-            onChange={(e) => set({ targetHours: e.target.value })}
-            error={errors.targetHours}
-            placeholder="For example 40"
+            label={draft.kind === "altar" ? "Prayer commitment (hours a week)" : "Prayer commitment hours (a week)"}
+            name="commitment_hours"
+            inputMode="decimal"
+            value={draft.commitmentHours}
+            onChange={(e) => set({ commitmentHours: e.target.value })}
+            error={errors.commitmentHours}
+            hint="Weeks start on Sunday."
+            placeholder="For example 5"
             autoComplete="off"
           />
           {draft.kind === "prayer" ? (

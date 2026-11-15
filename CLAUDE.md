@@ -24,6 +24,8 @@ Mobile-first prayer PWA. Next.js App Router, TypeScript strict, Tailwind, Supaba
 - Stretches: time comes only from stored timestamps (src/features/stretch/clock.ts), never a counter.
   A running stretch and any unsaved finished one live in localStorage; the only write is
   complete_session in src/features/stretch/mutations.ts, with the id chosen at the start.
+- Commitment: altars have a weekly prayer commitment and no target; prayers have both. A prayer's page has no
+  Edit, Archive or Delete buttons except the Edit link at the top for its owner.
 - Screens inside the app are wrapped in ProfileGate (signed in and named). Read the signed-in
   person with useProfile() in client components or getCurrentProfile() on the server.
 - Phone first: design at 390px. Tap targets >= 44px, inputs >= 16px, scripture >= 18px,

@@ -1,4 +1,5 @@
 import { DetailSkeleton } from "@/features/prayers/Skeletons";
+import { TimeZoneCookie } from "@/lib/TimeZoneCookie";
 import { PendingStretchSync } from "@/features/stretch/PendingStretchSync";
 import { ProfileGate } from "@/features/profile/ProfileGate";
 
@@ -12,6 +13,7 @@ export default function FocusLayout({ children }: { children: React.ReactNode })
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-safe pt-safe pb-safe">
       <ProfileGate fallback={<DetailSkeleton />}>
         <PendingStretchSync />
+        <TimeZoneCookie />
         {children}
       </ProfileGate>
     </main>

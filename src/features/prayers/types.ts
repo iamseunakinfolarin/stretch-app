@@ -16,7 +16,10 @@ export type PrayerSummary = {
   title: string;
   kind: PrayerKind;
   status: PrayerStatus;
+  /** Prayers only: hours to pray in total. Altars have a weekly commitment instead. */
   targetHours: number | null;
+  /** Hours to pray each week, or null. */
+  commitmentHours: number | null;
   plannedStartDate: string | null;
   plannedEndDate: string | null;
   pointCount: number;
@@ -29,6 +32,8 @@ export type PrayerSummary = {
 /** Everything the detail and edit screens need. */
 export type PrayerDetail = PrayerSummary & {
   isOwner: boolean;
+  /** How many people are in this prayer, the owner included. */
+  memberCount: number;
   points: PrayerPoint[];
   scriptures: Scripture[];
 };
@@ -38,6 +43,7 @@ export type PrayerDraft = {
   kind: PrayerKind;
   title: string;
   targetHours: string;
+  commitmentHours: string;
   plannedStartDate: string;
   plannedEndDate: string;
   points: PrayerPoint[];
@@ -55,3 +61,12 @@ export function toStatus(value: string): PrayerStatus {
 export function isArchived(prayer: { status: PrayerStatus }): boolean {
   return prayer.status === "archived";
 }
+
+/** How the signed-in person is doing against the weekly commitment. */
+export type CommitmentStatus = {
+  commitmentHours: number;
+  completedWeeks: number;
+  thisWeekSeconds: number;
+  /** Seconds short of the commitment over finished weeks. Zero once they have caught up. */
+  shortfallSeconds: number;
+};

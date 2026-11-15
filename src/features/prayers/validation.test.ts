@@ -5,6 +5,7 @@ import {
   moveItem,
   normalizeDraft,
   validateDates,
+  validateCommitmentHours,
   validateDraft,
   validatePoint,
   validateScripture,
@@ -16,6 +17,7 @@ const draft = (over: Partial<PrayerDraft> = {}): PrayerDraft => ({
   kind: "prayer",
   title: "For Mum's recovery",
   targetHours: "",
+  commitmentHours: "",
   plannedStartDate: "",
   plannedEndDate: "",
   points: [],
@@ -105,10 +107,11 @@ describe("normalizeDraft", () => {
     expect(result.scriptures).toEqual([{ id: "s", reference: "Psalm 41:3", verseText: "", translation: "KJV" }]);
   });
   it("removes dates from an altar, which has no end", () => {
-    const result = normalizeDraft(draft({ kind: "altar", plannedStartDate: "2026-12-01", plannedEndDate: "2026-12-31", targetHours: " 100 " }));
+    const result = normalizeDraft(draft({ kind: "altar", plannedStartDate: "2026-12-01", plannedEndDate: "2026-12-31", targetHours: " 100 ", commitmentHours: " 5 " }));
     expect(result.plannedStartDate).toBe("");
     expect(result.plannedEndDate).toBe("");
-    expect(result.targetHours).toBe("100");
+    expect(result.targetHours).toBe("");
+    expect(result.commitmentHours).toBe("5");
   });
 });
 
@@ -168,5 +171,22 @@ describe("isUuid", () => {
     expect(isUuid("10000000-0000-4000-a000-000000000001")).toBe(true);
     expect(isUuid("example-id")).toBe(false);
     expect(isUuid("10000000-0000-4000-a000-000000000001' or 1=1")).toBe(false);
+  });
+});
+
+describe("validateCommitmentHours", () => {
+  it("accepts nothing, whole hours and half hours", () => {
+    expect(validateCommitmentHours("")).toBeNull();
+    expect(validateCommitmentHours("5")).toBeNull();
+    expect(validateCommitmentHours("2.5")).toBeNull();
+    expect(validateCommitmentHours("168")).toBeNull();
+  });
+  it("refuses anything else, with a plain message", () => {
+    expect(validateCommitmentHours("0")).toMatch(/half an hour/);
+    expect(validateCommitmentHours("0.4")).toMatch(/half an hour/);
+    expect(validateCommitmentHours("169")).toMatch(/168 hours/);
+    expect(validateCommitmentHours("five")).toMatch(/hours a week/);
+    expect(validateCommitmentHours("2.55")).toMatch(/hours a week/);
+    expect(validateCommitmentHours("-1")).toMatch(/hours a week/);
   });
 });
