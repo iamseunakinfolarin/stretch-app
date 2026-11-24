@@ -20,11 +20,11 @@ select tests.expect_count($$select 1 from pg_trigger t join pg_class c on c.oid 
 select tests.expect_count($$select 1 from information_schema.columns where table_schema = 'public'
   and column_name in ('created_at','updated_at') and data_type = 'timestamp with time zone' and column_default = 'now()'$$, 20, 'every table has created_at and updated_at defaulting to now()');
 
--- Signed-out visitors: no table access, and ping() is the only function they may call.
+-- Signed-out visitors: no table access; only ping() and preview_invite() may be called.
 select tests.expect_count($$select 1 from pg_class c where c.relnamespace = 'public'::regnamespace and c.relkind = 'r'
   and has_table_privilege('anon', c.oid, 'select, insert, update, delete, truncate')$$, 0, 'anon has no privileges on any table');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')$$, 'ping', 'ping() is the only function anon may execute');
+  where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')$$, 'ping,preview_invite', 'ping() and preview_invite() are the only functions anon may execute');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')$$,
   'complete_session,create_or_reset_invite,delete_my_account,get_my_commitment_status,get_my_hours,get_prayer_hours,join_prayer_by_code,ping,preview_invite,save_prayer',

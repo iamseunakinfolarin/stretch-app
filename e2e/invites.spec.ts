@@ -7,7 +7,7 @@ test.use({ storageState: { cookies: [], origins: [] } });
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
 async function inviteCode(page: Page): Promise<string> {
-  const text = (await page.getByLabel("Invite link").textContent()) ?? "";
+  const text = (await page.getByLabel("Invite message").textContent()) ?? "";
   const match = text.match(/\/join\/([A-Z2-9]{8})$/);
   expect(match, `an invite link in "${text}"`).not.toBeNull();
   return match![1];
@@ -31,15 +31,24 @@ test("invite a friend by link: they sign up, join, pray along, can leave, and an
   // Invite friends: a link to copy or share.
   await page.getByRole("button", { name: "Invite friends" }).click();
   const code = await inviteCode(page);
-  await expect(page.getByRole("button", { name: "Copy link" })).toBeVisible();
+  await expect(page.getByLabel("Invite message")).toHaveText(/^Grace is inviting you to pray together on "For Mum's recovery"\. Join here: http\S+\/join\/[A-Z2-9]{8}$/);
+  await expect(page.getByRole("button", { name: "Copy invite" })).toBeVisible();
   await shot(page, "invite-link");
 
-  // The friend opens the link with no account: sign in first, then the invite is waiting.
+  // The friend opens the link with no account. They see who is inviting them before signing up,
+  // and so does a link preview.
   const friendContext = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
   const friend = await friendContext.newPage();
   await friend.goto(`/join/${code}`);
-  await expect(friend).toHaveURL(/\/sign-in$/);
-  await friend.goto("/sign-up");
+  await expect(friend).toHaveURL(new RegExp(`/join/${code}$`));
+  await expect(friend.getByText("Grace is inviting you to pray together", { exact: true }).filter({ visible: true })).toBeVisible();
+  await expect(friend.getByRole("heading", { level: 1, name: "For Mum's recovery" })).toBeVisible();
+  await expect(friend.locator('meta[property="og:title"]')).toHaveAttribute("content", "Grace is inviting you to pray together");
+  await expect(friend.locator('meta[property="og:description"]')).toHaveAttribute("content", 'on "For Mum\'s recovery". Join on Stretch.');
+  await expect(friend.getByRole("listitem")).toHaveCount(0);
+  await shot(friend, "invite-signed-out");
+  await friend.getByRole("link", { name: "Sign up to join" }).click();
+  await expect(friend).toHaveURL(/\/sign-up$/);
   await friend.getByLabel("Email").fill(uniqueEmail("invitee"));
   await friend.getByLabel("Password").fill(PASSWORD);
   await friend.getByRole("button", { name: "Create account" }).click();
@@ -47,7 +56,7 @@ test("invite a friend by link: they sign up, join, pray along, can leave, and an
   await friend.getByLabel("Your name").fill("Dayo Ade");
   await friend.getByRole("button", { name: "Continue" }).click();
   await expect(friend).toHaveURL(new RegExp(`/join/${code}$`));
-  await expect(friend.getByText("Grace invited you to pray")).toBeVisible();
+  await expect(friend.getByText("Grace is inviting you to pray together", { exact: true }).filter({ visible: true })).toBeVisible();
   await expect(friend.getByRole("heading", { level: 1, name: "For Mum's recovery" })).toBeVisible();
   await shot(friend, "invite-join");
 

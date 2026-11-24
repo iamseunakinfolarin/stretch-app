@@ -1,6 +1,6 @@
 -- preview_invite: a signed-in person with a valid code sees only the title, type, the inviter's first name,
--- whether it is archived and whether they are already in it. A wrong code shows nothing; signed-out visitors
--- cannot call it.
+-- whether it is archived and whether they are already in it. A wrong code shows nothing. Signed-out visitors
+-- (and link-preview apps) see the same few things, and are never told they are a member.
 select tests.act_as('owner');
 update public.profiles set display_name = 'Grace Owner' where id = tests.uid('owner');
 select tests.remember('code', public.create_or_reset_invite(tests.id('prayer')));
@@ -21,4 +21,6 @@ select tests.act_as('outsider');
 select tests.expect_value(format($$select archived::text from public.preview_invite(%L)$$, tests.recall('code')), 'true', 'the preview says it is archived');
 
 select tests.act_as_anon();
-select tests.expect_error($$select * from public.preview_invite('ABCDEFGH')$$, '42501', 'a signed-out visitor cannot call it');
+select tests.expect_value(format($$select title || ' | ' || owner_first_name || ' | ' || already_member from public.preview_invite(%L)$$, tests.recall('code')), 'For my family | Grace | false', 'a signed-out visitor sees the same preview, and is not a member');
+select tests.expect_count($$select 1 from public.preview_invite('WRONGCDE')$$, 0, 'and a wrong code still shows nothing');
+select tests.expect_error($$select 1 from public.prayers$$, '42501', 'but still cannot read prayers');
