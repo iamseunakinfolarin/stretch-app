@@ -5,6 +5,8 @@ import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormError } from "@/components/FormError";
 import { dataErrorMessage } from "@/features/auth/messages";
+import { useProfile } from "@/features/profile/ProfileContext";
+import { inviteHeadline, inviteMessage } from "./invite-words";
 import { createOrResetInvite } from "./mutations";
 
 const noSubscribe = () => () => {};
@@ -20,6 +22,8 @@ export function InvitePanel({ prayerId, title, noun, initialCode }: { prayerId: 
   const origin = useSyncExternalStore(noSubscribe, () => window.location.origin, () => "");
   const canShare = useSyncExternalStore(noSubscribe, () => typeof navigator.share === "function", () => false);
   const link = code && origin ? `${origin}/join/${code}` : "";
+  const firstName = useProfile().displayName.trim().split(/\s+/)[0] || null;
+  const message = link ? inviteMessage(firstName, title, link) : "";
 
   async function make() {
     setBusy(true);
@@ -37,16 +41,16 @@ export function InvitePanel({ prayerId, title, noun, initialCode }: { prayerId: 
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(message);
       setCopied(true);
     } catch {
-      setError("Couldn't copy here. Press and hold the link to copy it instead.");
+      setError("Couldn't copy here. Press and hold the message to copy it instead.");
     }
   }
 
   async function share() {
     try {
-      await navigator.share({ title: `Pray with me: ${title}`, text: `Pray with me: ${title}`, url: link });
+      await navigator.share({ title: inviteHeadline(firstName), text: `${inviteHeadline(firstName)} on "${title}".`, url: link });
     } catch {
       // Closing the share sheet is not a problem.
     }
@@ -65,15 +69,15 @@ export function InvitePanel({ prayerId, title, noun, initialCode }: { prayerId: 
 
   return (
     <div className="flex flex-col gap-3 rounded-card border border-hairline bg-surface p-4">
-      <p className="eyebrow text-muted">Invite link</p>
-      <p aria-label="Invite link" className="rounded-control bg-wash px-3 py-3 font-semibold break-all text-ink select-all">
-        {link || `…/join/${code}`}
+      <p className="eyebrow text-muted">Invite message</p>
+      <p aria-label="Invite message" className="rounded-control bg-wash px-3 py-3 break-words text-ink select-all">
+        {message || `…/join/${code}`}
       </p>
       <p className="text-caption text-muted">Anyone with this link can join this {noun} and pray with you.</p>
       <FormError message={error} />
       <div className="grid grid-cols-2 gap-3">
         <Button variant="secondary" onClick={() => void copy()} disabled={!link}>
-          {copied ? "Copied" : "Copy link"}
+          {copied ? "Copied" : "Copy invite"}
         </Button>
         {canShare ? (
           <Button onClick={() => void share()} disabled={!link}>

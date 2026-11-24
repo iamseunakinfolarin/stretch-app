@@ -63,14 +63,13 @@ export async function updateSession(request: NextRequest) {
   }
   const onAuthScreen = AUTH_SCREENS.includes(pathname);
 
-  if (!signedIn && !onAuthScreen) {
-    const response = redirectTo(request, supabaseResponse, "/sign-in");
-    // Opening an invite link signed out: remember it, so after signing in (and naming yourself) you land on it.
-    if (JOIN_PATH.test(pathname)) {
-      response.cookies.set(NEXT_COOKIE, pathname, { path: "/", maxAge: 60 * 60, sameSite: "lax" });
-    }
-    return response;
+  // An invite link is open to everyone, so people (and link-preview apps) see who is inviting them before
+  // signing in. It is remembered, so after signing up or in (and naming yourself) you land back on it.
+  if (!signedIn && JOIN_PATH.test(pathname)) {
+    supabaseResponse.cookies.set(NEXT_COOKIE, pathname, { path: "/", maxAge: 60 * 60, sameSite: "lax" });
+    return supabaseResponse;
   }
+  if (!signedIn && !onAuthScreen) return redirectTo(request, supabaseResponse, "/sign-in");
   if (signedIn && onAuthScreen) return redirectTo(request, supabaseResponse, "/");
   // Arriving home with an invite still waiting: go to it. The join page clears the reminder.
   if (signedIn && pathname === "/") {
