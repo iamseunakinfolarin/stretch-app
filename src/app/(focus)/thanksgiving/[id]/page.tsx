@@ -21,7 +21,7 @@ export default async function ThanksgivingPage({ params }: { params: Promise<{ i
         <BackLink href="/thanksgiving">Thanksgiving</BackLink>
         {item.isMine ? (
           <Link href={`/thanksgiving/${item.id}/edit`} className="inline-flex min-h-field items-center px-2 font-semibold text-primary">
-            Edit
+            Edit thanksgiving
           </Link>
         ) : null}
       </div>

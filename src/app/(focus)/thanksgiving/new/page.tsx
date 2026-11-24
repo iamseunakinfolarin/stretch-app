@@ -8,11 +8,13 @@ import { ThanksgivingForm } from "@/features/thanksgiving/ThanksgivingForm";
 
 export const metadata: Metadata = { title: "New thanksgiving" };
 
-export default async function NewThanksgivingPage({ searchParams }: { searchParams: Promise<{ prayer?: string }> }) {
-  const { prayer } = await searchParams;
+export default async function NewThanksgivingPage({ searchParams }: { searchParams: Promise<{ prayer?: string; category?: string }> }) {
+  const { prayer, category } = await searchParams;
   const [categories, prayers] = await Promise.all([listCategories(), listMyPrayers()]);
   const options = prayers.filter((p) => !isArchived(p)).map((p) => ({ id: p.id, title: p.title }));
+  // "Add" on a prayer or a category page arrives with that prayer or category already chosen.
   const preselected = prayer && isUuid(prayer) && options.some((o) => o.id === prayer) ? prayer : "";
+  const preCategory = category && isUuid(category) && categories.some((c) => c.id === category) ? category : "";
 
   return (
     <>
@@ -23,8 +25,8 @@ export default async function NewThanksgivingPage({ searchParams }: { searchPara
         categories={categories}
         prayers={options}
         initial={
-          preselected
-            ? { title: "", body: "", happenedOn: "", prayerId: preselected, categoryId: "", newCategoryName: "", newCategoryGlow: "gold", shared: false }
+          preselected || preCategory
+            ? { title: "", body: "", happenedOn: "", prayerId: preselected, categoryId: preCategory, newCategoryName: "", newCategoryGlow: "gold", shared: false }
             : undefined
         }
       />

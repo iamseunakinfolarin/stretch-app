@@ -60,6 +60,8 @@ export function dataErrorMessage(error: unknown): string {
   if (!error || typeof error !== "object") return FALLBACK;
   const e = error as ErrorLike;
   if (isNetworkError(e)) return OFFLINE;
+  if (e.code === "ST001") return "That invite link doesn't work any more. Ask for a new one.";
+  if (e.code === "ST002") return "This prayer has been archived, so it can't be joined.";
   if (e.code === "23505") return "You already have a category with that name.";
   if (e.code === "23514") return "That value isn't allowed. Check it and try again.";
   if (e.code === "22023") return "That's more than a prayer can hold: up to 20 prayer points and 10 key scriptures.";
@@ -70,7 +72,7 @@ export function dataErrorMessage(error: unknown): string {
 
 /** What to tell a person when a stretch ends. */
 export const STRETCH_MESSAGES = {
-  tooShort: "That was under a minute, so it wasn't saved. A stretch counts once you've prayed for a full minute.",
-  waiting: "Your stretch is saved on this phone. It will be added to your hours as soon as you're back online.",
-  refused: "We couldn't add that stretch to this prayer. It may belong to someone else, or you may need to sign in again.",
+  tooShort: "That was under a minute, so it wasn't saved. Prayer time counts once you've prayed for a full minute.",
+  waiting: "Your prayer time is saved on this phone. It will be added to your hours as soon as you're back online.",
+  refused: "We couldn't add that prayer time to this prayer. It may belong to someone else, or you may need to sign in again.",
 } as const;

@@ -12,6 +12,9 @@ import { getSupabaseEnv } from "./env";
 const AUTH_SCREENS = ["/sign-in", "/sign-up"];
 /** The page a confirmation email link lands on. It signs the person in, so it must be reachable signed out. */
 const CALLBACK = "/auth/callback";
+/** An invite link, and the cookie that remembers one across sign-in. */
+const JOIN_PATH = /^\/join\/[A-Za-z0-9]{8}$/;
+export const NEXT_COOKIE = "stretch_next";
 
 /** A redirect that still carries any refreshed session cookies to the browser. */
 function redirectTo(request: NextRequest, from: NextResponse, pathname: string) {
@@ -60,8 +63,20 @@ export async function updateSession(request: NextRequest) {
   }
   const onAuthScreen = AUTH_SCREENS.includes(pathname);
 
-  if (!signedIn && !onAuthScreen) return redirectTo(request, supabaseResponse, "/sign-in");
+  if (!signedIn && !onAuthScreen) {
+    const response = redirectTo(request, supabaseResponse, "/sign-in");
+    // Opening an invite link signed out: remember it, so after signing in (and naming yourself) you land on it.
+    if (JOIN_PATH.test(pathname)) {
+      response.cookies.set(NEXT_COOKIE, pathname, { path: "/", maxAge: 60 * 60, sameSite: "lax" });
+    }
+    return response;
+  }
   if (signedIn && onAuthScreen) return redirectTo(request, supabaseResponse, "/");
+  // Arriving home with an invite still waiting: go to it. The join page clears the reminder.
+  if (signedIn && pathname === "/") {
+    const next = request.cookies.get(NEXT_COOKIE)?.value;
+    if (next && JOIN_PATH.test(next)) return redirectTo(request, supabaseResponse, next);
+  }
 
   // Return supabaseResponse as is, so the refreshed cookies reach the browser.
   return supabaseResponse;

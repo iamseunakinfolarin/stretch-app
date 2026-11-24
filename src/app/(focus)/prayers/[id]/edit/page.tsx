@@ -8,8 +8,15 @@ import { isArchived } from "@/features/prayers/types";
 
 export const metadata: Metadata = { title: "Edit" };
 
-export default async function EditPrayerPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditPrayerPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ add?: string }>;
+}) {
   const { id } = await params;
+  const { add } = await searchParams;
   const prayer = await getPrayer(id);
   // Only the owner edits. Anyone else gets the same not-found page as for a prayer that does not exist.
   if (!prayer || !prayer.isOwner) notFound();
@@ -29,8 +36,12 @@ export default async function EditPrayerPage({ params }: { params: Promise<{ id:
           commitmentHours: prayer.commitmentHours ? String(prayer.commitmentHours) : "",
           plannedStartDate: prayer.plannedStartDate ?? "",
           plannedEndDate: prayer.plannedEndDate ?? "",
-          points: prayer.points,
-          scriptures: prayer.scriptures,
+          // "Add" on the prayer page arrives here with an empty row ready to type in.
+          points: add === "point" ? [...prayer.points, { id: crypto.randomUUID(), body: "" }] : prayer.points,
+          scriptures:
+            add === "scripture"
+              ? [...prayer.scriptures, { id: crypto.randomUUID(), reference: "", verseText: "", translation: "" }]
+              : prayer.scriptures,
         }}
       />
       <div className="mt-10 mb-6">

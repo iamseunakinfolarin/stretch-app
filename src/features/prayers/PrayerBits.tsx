@@ -37,8 +37,9 @@ export function PrayerTile({ prayer }: { prayer: PrayerSummary }) {
       href={`/prayers/${prayer.id}`}
       className="flex min-h-36 flex-col rounded-card border border-hairline bg-surface p-4 shadow-card active:bg-wash"
     >
-      <span>
+      <span className="flex flex-wrap gap-1.5">
         <KindChip kind={prayer.kind} />
+        {!prayer.isOwner ? <span className="eyebrow inline-flex items-center rounded-full border border-hairline px-3 py-1 text-muted">Shared</span> : null}
       </span>
       <span className="mt-3 line-clamp-3 font-bold break-words text-forest">{prayer.title}</span>
       <span className="mt-auto pt-3 text-caption text-muted">

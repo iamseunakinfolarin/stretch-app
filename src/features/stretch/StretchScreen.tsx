@@ -41,7 +41,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
   const hydrated = useHydrated();
   const stretchRef = useRef<Stretch | null>(null);
   const [stretch, setStretch] = useState<Stretch | null>(null);
-  // The other stretch, if one is already running on a different prayer.
+  // The other prayer time, if one is already running on a different prayer.
   const [elsewhere, setElsewhere] = useState<Stretch | null>(null);
   const [now, setNow] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -84,6 +84,17 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
     setNow(t);
     setLoaded(true);
     void flushPendingStretches();
+    // Next keeps this screen alive, hidden, after you leave it. Clear it then, so coming back always starts
+    // fresh from what is stored on the phone, never from the last result.
+    return () => {
+      stretchRef.current = null;
+      setStretch(null);
+      setElsewhere(null);
+      setOutcome(null);
+      setConfirmEnd(false);
+      setEnding(false);
+      setLoaded(false);
+    };
   }, [prayerId]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -149,7 +160,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
     return (
       <>
         <h1 className="mt-8 text-title font-bold text-forest">
-          {outcome.kind === "short" || outcome.kind === "refused" ? "Stretch ended" : "Well prayed"}
+          {outcome.kind === "short" || outcome.kind === "refused" ? "Prayer time ended" : "Well prayed"}
         </h1>
         <p role="status" className="mt-3 text-body text-ink">
           {message}
@@ -158,7 +169,10 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
           <Link href={`/prayers/${prayerId}`} className={buttonClass("primary")}>
             Back to this prayer
           </Link>
-          <Link href="/" className={buttonClass("secondary")}>
+          <Button variant="secondary" onClick={() => setOutcome(null)}>
+            Pray again
+          </Button>
+          <Link href="/" className={buttonClass("quiet")}>
             Back to home
           </Link>
         </div>
@@ -175,7 +189,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
     return (
       <>
         <BackLink href={`/prayers/${prayerId}`}>Back</BackLink>
-        <p className="eyebrow mt-4 text-muted">Stretch</p>
+        <p className="eyebrow mt-4 text-muted">Prayer time</p>
         <h1 className="mt-1 text-title font-bold break-words text-forest">{title}</h1>
         <p className="mt-3 text-muted">
           {points.length === 0 ? "No prayer points yet." : `${points.length} prayer point${points.length === 1 ? "" : "s"} to pray through.`}
@@ -183,11 +197,11 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
 
         {elsewhere ? (
           <div className="mt-6 rounded-card border border-hairline bg-surface p-5">
-            <p className="font-semibold text-forest">A stretch is already running</p>
-            <p className="mt-1 text-muted break-words">You have a stretch open on &ldquo;{elsewhere.prayerTitle}&rdquo;. Finish it before you start another.</p>
+            <p className="font-semibold text-forest">Another prayer time is already running</p>
+            <p className="mt-1 text-muted break-words">You are already praying for &ldquo;{elsewhere.prayerTitle}&rdquo;. Finish it before you start another.</p>
             <div className="mt-4">
               <Link href={`/stretch/${elsewhere.prayerId}`} className={buttonClass("secondary")}>
-                Go to that stretch
+                Go back to it
               </Link>
             </div>
           </div>
@@ -200,7 +214,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
             </ul>
             <div className="mt-8">
               <Button onClick={start} disabled={!hydrated}>
-                Start stretch
+                Begin
               </Button>
             </div>
           </>
@@ -266,7 +280,7 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
           </Button>
         )}
         <Button variant="quiet-danger" onClick={() => setConfirmEnd(true)} disabled={ending}>
-          End stretch
+          End prayer time
         </Button>
       </div>
 
@@ -278,13 +292,13 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
 
       <ConfirmDialog
         open={confirmEnd}
-        title="End this stretch?"
+        title="End this prayer time?"
         description={
           seconds < 60
-            ? "You've prayed for less than a minute, so this stretch won't be saved."
+            ? "You've prayed for less than a minute, so it won't be saved."
             : `${describeDuration(seconds)} will be added to your hours.`
         }
-        confirmLabel="End stretch"
+        confirmLabel="End prayer time"
         cancelLabel="Keep praying"
         busy={ending}
         onConfirm={() => void end()}

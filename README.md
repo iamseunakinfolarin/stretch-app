@@ -280,3 +280,11 @@ The old Testimonies tab is now **Thanksgiving**: a place to record every answer 
 - **Pages:** `/thanksgiving` (categories and recent), `/thanksgiving/c/[id]` (a category), `/thanksgiving/[id]` (one thanksgiving, with a small Edit link for its author), `/thanksgiving/scroll` (one at a time, swipe up; an optional slow Play, off to begin with and unavailable with reduced motion). `/testimonies` redirects here.
 - **Look:** warm "lit from within" cards in the category's colour on the light theme (`.glow-card` in `globals.css`), with slow ambient motion that stops for reduced motion.
 - Two new tables: `thanksgiving_categories` and `thanksgivings`. The older `entries` table is unchanged.
+
+## Inviting friends, and plainer words
+
+- **Invite friends:** on a prayer or altar they own, the owner taps **Invite friends** to get a link (`/join/CODE`) to copy or share. **Make a new link** replaces it, and the old link stops working; people who joined stay in.
+- **Joining:** the link shows who invited you and to what (`preview_invite`), then **Join**. Someone signed out is sent to sign in or sign up and name themselves first, then lands back on the invite (a short-lived `stretch_next` cookie remembers it). Members can pray, see the points, scriptures and shared thanksgivings, and their hours count in the group total. They cannot edit. Shared prayers show a **Shared** chip on Pray home.
+- **People praying:** every prayer page lists who is in it. The owner can remove someone; a member can leave. Hours prayed always stay with the person.
+- **Words:** "Start praying", "Begin", "End prayer time" and "Prayer time ended". The ended screen has **Pray again**, and coming back to the praying screen always starts fresh.
+- **Add:** small Add links beside Prayer points, Key scriptures, Answers to this prayer and on a thanksgiving category. Edit links say what they edit: Edit prayer, Edit altar, Edit thanksgiving.

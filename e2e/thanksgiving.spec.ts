@@ -104,7 +104,7 @@ test("record thanksgivings, group them in categories, scroll through them and ke
 
   // Edit, from the small link at the top, then delete from the edit page.
   await page.goto(sharedUrl);
-  await page.getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByRole("link", { name: "Edit thanksgiving" }).click();
   await expect(page).toHaveURL(/\/edit$/);
   await page.getByLabel("Title").fill("The scan came back completely clear");
   await page.getByRole("button", { name: "Save changes" }).click();
