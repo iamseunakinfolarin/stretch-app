@@ -27,7 +27,7 @@ select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname)
   where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute')$$, 'ping', 'ping() is the only function anon may execute');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public' and has_function_privilege('authenticated', p.oid, 'execute')$$,
-  'complete_session,create_or_reset_invite,delete_my_account,get_my_commitment_status,get_my_hours,get_prayer_hours,join_prayer_by_code,ping,save_prayer',
+  'complete_session,create_or_reset_invite,delete_my_account,get_my_commitment_status,get_my_hours,get_prayer_hours,join_prayer_by_code,ping,preview_invite,save_prayer',
   'in the API schema, authenticated may execute the app functions and nothing else');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'private'$$, 'is_prayer_member,is_prayer_owner,shares_prayer_with', 'the policy helper functions live in the private schema, outside the API');
@@ -36,8 +36,8 @@ select tests.expect_count($$select 1 from pg_proc p join pg_namespace n on n.oid
   where n.nspname = 'private' and has_function_privilege('anon', p.oid, 'execute')$$, 0, 'anon cannot execute the helper functions');
 select tests.expect_value($$select string_agg(p.proname, ',' order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public' and p.prosecdef and has_function_privilege('authenticated', p.oid, 'execute')$$,
-  'create_or_reset_invite,delete_my_account,get_prayer_hours,join_prayer_by_code',
-  'only the four functions that need elevated rights are SECURITY DEFINER and callable');
+  'create_or_reset_invite,delete_my_account,get_prayer_hours,join_prayer_by_code,preview_invite',
+  'only the five functions that need elevated rights are SECURITY DEFINER and callable');
 select tests.expect_count($$select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname in ('public', 'private') and not coalesce(p.proconfig, '{}') @> array['search_path=""']$$, 0, 'every function has an empty search_path');
 

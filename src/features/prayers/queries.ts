@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/features/profile/current-profile";
-import { toKind, toStatus, type CommitmentStatus, type PrayerDetail, type PrayerSummary } from "./types";
+import { toKind, toStatus, type CommitmentStatus, type InvitePreview, type Member, type PrayerDetail, type PrayerSummary } from "./types";
 import { isUuid } from "./validation";
 
 // All reads of prayers go through this file. Every query runs as the signed-in person,
@@ -26,6 +26,7 @@ const SUMMARY_COLUMNS =
 
 /** The signed-in person's prayers and altars, newest first, with hours and point counts. */
 export async function listMyPrayers(): Promise<PrayerSummary[]> {
+  const profile = await getCurrentProfile();
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("prayers")
@@ -45,6 +46,7 @@ export async function listMyPrayers(): Promise<PrayerSummary[]> {
     plannedStartDate: row.planned_start_date,
     plannedEndDate: row.planned_end_date,
     pointCount: row.prayer_points[0]?.count ?? 0,
+    isOwner: row.owner_id === profile.id,
     mySeconds: hours.get(row.id)?.mySeconds ?? 0,
     groupSeconds: hours.get(row.id)?.groupSeconds ?? 0,
   }));
@@ -115,5 +117,52 @@ export async function getCommitmentStatus(prayerId: string, timeZone: string): P
     completedWeeks: row.completed_weeks,
     thisWeekSeconds: Number(row.this_week_seconds),
     shortfallSeconds: Number(row.shortfall_seconds),
+  };
+}
+
+/** The people in a prayer, owner first. Only someone in the prayer gets anyone back. */
+export async function listMembers(prayerId: string): Promise<Member[]> {
+  if (!isUuid(prayerId)) return [];
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("prayer_members")
+    .select("user_id, role, joined_at, profiles(display_name)")
+    .eq("prayer_id", prayerId)
+    .order("joined_at");
+  if (error) throw error;
+  return (data ?? [])
+    .map((row) => ({
+      userId: row.user_id,
+      name: row.profiles?.display_name?.trim() || "Someone",
+      isOwner: row.role === "owner",
+      isMe: row.user_id === profile.id,
+    }))
+    .sort((a, b) => Number(b.isOwner) - Number(a.isOwner));
+}
+
+/** The prayer's current invite code, for its owner, or null when none has been made. */
+export async function getInviteCode(prayerId: string): Promise<string | null> {
+  if (!isUuid(prayerId)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("prayer_invites").select("code").eq("prayer_id", prayerId).maybeSingle();
+  if (error) throw error;
+  return data?.code ?? null;
+}
+
+/** What an invite code leads to, or null when the code does not work. */
+export async function previewInvite(code: string): Promise<InvitePreview | null> {
+  if (!/^[A-Za-z0-9]{8}$/.test(code)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("preview_invite", { code });
+  if (error) throw error;
+  const row = data?.[0];
+  if (!row) return null;
+  return {
+    title: row.title,
+    kind: toKind(row.kind),
+    ownerFirstName: row.owner_first_name ?? null,
+    archived: row.archived,
+    alreadyMember: row.already_member,
   };
 }

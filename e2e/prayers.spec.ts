@@ -164,7 +164,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
 
   // Edit: rename, change the plan, edit, reorder, add and remove points, edit and add scriptures.
   await page.goto(mumUrl);
-  await page.getByRole("link", { name: "Edit" }).click();
+  await page.getByRole("link", { name: /^Edit (prayer|altar)$/ }).click();
   await expect(page).toHaveURL(/\/edit$/);
   await expect(page.getByLabel("Title")).toHaveValue("For Mum's recovery");
   await expect(page.getByText("The type is chosen once, when it is created.")).toBeVisible();
@@ -200,7 +200,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await expectEdited();
 
   // Leaving a form with unsaved changes asks first.
-  await page.getByRole("link", { name: "Edit" }).click();
+  await page.getByRole("link", { name: /^Edit (prayer|altar)$/ }).click();
   await page.getByLabel("Title").fill("Something I will not keep");
   await page.getByRole("button", { name: "Cancel" }).click();
   const leave = page.getByRole("dialog", { name: "Leave without saving?" });
@@ -212,13 +212,13 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   await expect(page.getByRole("heading", { level: 1, name: "For Mum's full recovery" })).toBeVisible();
 
   // Archive, from the edit page: it leaves the active lists but keeps everything.
-  await page.getByRole("link", { name: "Edit" }).click();
+  await page.getByRole("link", { name: /^Edit (prayer|altar)$/ }).click();
   await page.getByRole("button", { name: "Archive", exact: true }).click();
   await expect(page).toHaveURL(/\/prayers$/);
   await page.goto(mumUrl);
   await expect(page.getByText("Archived", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Reactivate" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Edit" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^Edit (prayer|altar)$/ })).toHaveCount(0);
   await expect(page.getByRole("listitem").filter({ hasText: "Wisdom for her doctors" })).toBeVisible();
   await page.goto(`${mumUrl}/edit`);
   await expect(page).toHaveURL(mumUrl);
@@ -232,7 +232,7 @@ test("create, edit, archive, reactivate and delete prayers and an altar", async 
   // Reactivate: it comes back.
   await page.goto(mumUrl);
   await page.getByRole("button", { name: "Reactivate" }).click();
-  await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Edit (prayer|altar)$/ })).toBeVisible();
   expect(await listCounts(page)).toEqual(["Prayers (2)", "Altars (1)", "Archived (0)"]);
 
   // Delete, from the edit page, asks first, and "Keep prayer" really keeps it.

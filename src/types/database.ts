@@ -503,6 +503,16 @@ export type Database = {
       };
       join_prayer_by_code: { Args: { code: string }; Returns: string };
       ping: { Args: Record<PropertyKey, never>; Returns: string };
+      preview_invite: {
+        Args: { code: string };
+        Returns: {
+          already_member: boolean;
+          archived: boolean;
+          kind: string;
+          owner_first_name: string;
+          title: string;
+        }[];
+      };
       save_prayer: {
         Args: {
           commitment_hours?: number;

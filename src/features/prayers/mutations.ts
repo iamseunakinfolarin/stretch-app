@@ -65,3 +65,32 @@ export async function reactivatePrayer(id: string): Promise<void> {
 export async function deletePrayer(id: string): Promise<void> {
   await changeOne(createClient().from("prayers").delete().eq("id", id).select("id"));
 }
+
+/** Makes the prayer's invite code, or a new one that replaces it (the old link stops working). Owner only. */
+export async function createOrResetInvite(prayerId: string): Promise<string> {
+  const { data, error } = await createClient().rpc("create_or_reset_invite", { prayer_id: prayerId });
+  if (error) throw error;
+  return data;
+}
+
+/** Joins the prayer an invite code belongs to and returns its id. Joining twice changes nothing. */
+export async function joinPrayer(code: string): Promise<string> {
+  const { data, error } = await createClient().rpc("join_prayer_by_code", { code });
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Takes someone out of a prayer: yourself (leaving), or a member if you own it.
+ * Their own hours stay theirs. Zero rows changed means it was not the caller's to do.
+ */
+export async function removeMember(prayerId: string, userId: string): Promise<void> {
+  const { data, error } = await createClient()
+    .from("prayer_members")
+    .delete()
+    .eq("prayer_id", prayerId)
+    .eq("user_id", userId)
+    .select("user_id");
+  if (error) throw error;
+  if (!data || data.length === 0) throw { code: "42501" };
+}

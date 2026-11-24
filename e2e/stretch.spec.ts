@@ -39,13 +39,13 @@ test("a stretch: points, scripture, check-ins, a missed check-in, pause and the 
   const id = await createPrayer(page);
 
   // From the prayer, start a stretch.
-  await page.getByRole("link", { name: "Start a stretch" }).click();
+  await page.getByRole("link", { name: "Start praying" }).click();
   await expect(page).toHaveURL(new RegExp(`/stretch/${id}$`));
   await expect(page.getByRole("heading", { level: 1, name: "For Mum's recovery" })).toBeVisible();
   await shot("stretch-start");
   await page.clock.install();
   await page.reload();
-  await page.getByRole("button", { name: "Start stretch" }).click();
+  await page.getByRole("button", { name: "Begin" }).click();
 
   // The clock, the points one at a time, and the key scripture (18px or more).
   await expect(clock(page)).toHaveText("0:00");
@@ -95,13 +95,13 @@ test("a stretch: points, scripture, check-ins, a missed check-in, pause and the 
 
   // Resume, then end. The confirmation says what will be saved.
   await page.getByRole("button", { name: "Resume" }).click();
-  await page.getByRole("button", { name: "End stretch" }).click();
-  const dialog = page.getByRole("dialog", { name: "End this stretch?" });
+  await page.getByRole("button", { name: "End prayer time" }).click();
+  const dialog = page.getByRole("dialog", { name: "End this prayer time?" });
   await expect(dialog).toContainText("will be added to your hours");
   await dialog.getByRole("button", { name: "Keep praying" }).click();
   await expect(dialog).toBeHidden();
-  await page.getByRole("button", { name: "End stretch" }).click();
-  await dialog.getByRole("button", { name: "End stretch" }).click();
+  await page.getByRole("button", { name: "End prayer time" }).click();
+  await dialog.getByRole("button", { name: "End prayer time" }).click();
   await expect(page.getByRole("status")).toContainText("added to your hours");
   await shot("stretch-saved");
 
@@ -120,18 +120,18 @@ test("a stretch survives a reload, and a lost connection never loses the time", 
 
   // Reload in the middle: the stretch carries on from its stored start time.
   await openStretch(page, id);
-  await page.getByRole("button", { name: "Start stretch" }).click();
+  await page.getByRole("button", { name: "Begin" }).click();
   await page.clock.fastForward(MIN);
   await expect(clock(page)).toHaveText("1:00");
   await page.reload();
   await expect(clock(page)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Start stretch" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Begin" })).toHaveCount(0);
 
   // End with no connection: the stretch is kept on the phone.
   await page.clock.fastForward(MIN);
   await context.setOffline(true);
-  await page.getByRole("button", { name: "End stretch" }).click();
-  await page.getByRole("dialog", { name: "End this stretch?" }).getByRole("button", { name: "End stretch" }).click();
+  await page.getByRole("button", { name: "End prayer time" }).click();
+  await page.getByRole("dialog", { name: "End this prayer time?" }).getByRole("button", { name: "End prayer time" }).click();
   await expect(page.getByRole("status")).toContainText("saved on this phone");
 
   // Back online, it reaches the database, once.
@@ -149,13 +149,28 @@ test("under a minute is not saved, and someone else's prayer is not found", asyn
   await createAccount(page, "stretch-short", "Dayo Ade");
   const id = await createPrayer(page);
   await openStretch(page, id);
-  await page.getByRole("button", { name: "Start stretch" }).click();
+  await page.getByRole("button", { name: "Begin" }).click();
   await page.clock.fastForward(30_000);
-  await page.getByRole("button", { name: "End stretch" }).click();
-  const dialog = page.getByRole("dialog", { name: "End this stretch?" });
+  await page.getByRole("button", { name: "End prayer time" }).click();
+  const dialog = page.getByRole("dialog", { name: "End this prayer time?" });
   await expect(dialog).toContainText("less than a minute");
-  await dialog.getByRole("button", { name: "End stretch" }).click();
+  await dialog.getByRole("button", { name: "End prayer time" }).click();
   await expect(page.getByRole("status")).toContainText("under a minute");
+
+  // "Pray again" starts a fresh prayer time straight away.
+  await page.getByRole("button", { name: "Pray again" }).click();
+  await expect(page.getByRole("button", { name: "Begin" })).toBeVisible();
+
+  // Ending under a minute, then going back to the prayer and starting again, also starts fresh (it used to stay stuck).
+  await page.getByRole("button", { name: "Begin" }).click();
+  await page.clock.fastForward(20_000);
+  await page.getByRole("button", { name: "End prayer time" }).click();
+  await page.getByRole("dialog", { name: "End this prayer time?" }).getByRole("button", { name: "End prayer time" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Prayer time ended" })).toBeVisible();
+  await page.getByRole("link", { name: "Back to this prayer" }).click();
+  await page.getByRole("link", { name: "Start praying" }).click();
+  await expect(page.getByRole("button", { name: "Begin" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Prayer time ended" })).toHaveCount(0);
 
   await page.goto("/stretch/4f1c8f0e-0000-4000-8000-000000000999");
   await expect(page.getByRole("heading", { name: "We couldn't find that" })).toBeVisible();

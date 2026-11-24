@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddLink } from "@/components/AddLink";
 import { BackLink } from "@/components/BackLink";
 import { buttonClass } from "@/components/Button";
 import { EmptyState } from "@/features/prayers/EmptyState";
@@ -26,7 +27,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
       <header style={glowStyle(category.glow)} className="glow-card mt-4 rounded-card px-6 py-6">
         <p className="eyebrow text-muted">Category</p>
         <h1 className="mt-2 text-title font-bold break-words text-forest">{category.name}</h1>
-        <p className="mt-1 text-muted">{countLabel(items.length)}</p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <p className="text-muted">{countLabel(items.length)}</p>
+          {!uncategorised ? <AddLink href={`/thanksgiving/new?category=${category.id}`} label={`Add a thanksgiving to ${category.name}`} /> : null}
+        </div>
       </header>
 
       {items.length === 0 ? (

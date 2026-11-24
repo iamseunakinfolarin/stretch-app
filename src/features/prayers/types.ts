@@ -23,6 +23,8 @@ export type PrayerSummary = {
   plannedStartDate: string | null;
   plannedEndDate: string | null;
   pointCount: number;
+  /** True when the signed-in person made it; false when they joined someone else's. */
+  isOwner: boolean;
   /** Seconds the signed-in person has prayed for this prayer. */
   mySeconds: number;
   /** Seconds everyone in the prayer has prayed. */
@@ -31,7 +33,6 @@ export type PrayerSummary = {
 
 /** Everything the detail and edit screens need. */
 export type PrayerDetail = PrayerSummary & {
-  isOwner: boolean;
   /** How many people are in this prayer, the owner included. */
   memberCount: number;
   points: PrayerPoint[];
@@ -70,3 +71,9 @@ export type CommitmentStatus = {
   /** Seconds short of the commitment over finished weeks. Zero once they have caught up. */
   shortfallSeconds: number;
 };
+
+/** Someone in a prayer. */
+export type Member = { userId: string; name: string; isOwner: boolean; isMe: boolean };
+
+/** What an invite link shows before joining. */
+export type InvitePreview = { title: string; kind: PrayerKind; ownerFirstName: string | null; archived: boolean; alreadyMember: boolean };
