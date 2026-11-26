@@ -10,6 +10,7 @@ import { STRETCH_MESSAGES } from "@/features/auth/messages";
 import { useHydrated } from "@/lib/use-hydrated";
 import { CheckInDialog } from "./CheckInDialog";
 import { PointSlider } from "./PointSlider";
+import { ScriptureSlider } from "./ScriptureSlider";
 import {
   activeSeconds,
   checkInRemainingMs,
@@ -48,7 +49,6 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [ending, setEnding] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
-  const [scriptureIndex, setScriptureIndex] = useState(0);
 
   const update = useCallback((next: Stretch | null) => {
     stretchRef.current = next;
@@ -182,7 +182,6 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
 
   if (!loaded) return <p className="mt-8 text-muted">Getting ready…</p>;
 
-  const scripture = scriptures.length > 0 ? scriptures[Math.min(scriptureIndex, scriptures.length - 1)] : null;
 
   // Before the stretch starts.
   if (!stretch) {
@@ -233,7 +232,8 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
       <p className="eyebrow mt-4 text-muted">{paused ? "Paused" : "Praying"}</p>
       <h1 className="mt-1 text-heading font-bold break-words text-forest">{stretch.prayerTitle}</h1>
 
-      <div className="mt-4 rounded-card bg-wash px-5 py-4 text-center">
+      {/* Pinned below the phone's status bar, so the time stays in view while you scroll. */}
+      <div className="sticky top-[env(safe-area-inset-top)] z-10 mt-4 rounded-card bg-wash px-5 py-4 text-center shadow-card">
         <p className="eyebrow text-muted">Time prayed</p>
         <p role="timer" aria-label="Time prayed" className="mt-1 text-display font-bold text-forest tabular-nums">
           {formatClock(seconds)}
@@ -250,26 +250,9 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
         <PointSlider points={points} />
       </div>
 
-      {scripture ? (
-        <figure className="mt-5 rounded-card border border-hairline bg-surface px-5 py-4">
-          {scripture.verseText ? (
-            <blockquote className="text-scripture font-medium break-words text-ink">{scripture.verseText}</blockquote>
-          ) : null}
-          <figcaption className={`font-bold text-forest ${scripture.verseText ? "mt-3" : ""}`}>
-            {scripture.reference}
-            {scripture.translation ? <span className="font-normal text-muted"> · {scripture.translation}</span> : null}
-          </figcaption>
-          {scriptures.length > 1 ? (
-            <button
-              type="button"
-              onClick={() => setScriptureIndex((i) => (i + 1) % scriptures.length)}
-              className="mt-3 inline-flex min-h-field items-center font-semibold text-primary"
-            >
-              Next scripture ({(Math.min(scriptureIndex, scriptures.length - 1)) + 1} of {scriptures.length})
-            </button>
-          ) : null}
-        </figure>
-      ) : null}
+      <div className="mt-5">
+        <ScriptureSlider scriptures={scriptures} />
+      </div>
 
       <div className="mt-6 flex flex-col gap-3 pb-6">
         {paused ? (
