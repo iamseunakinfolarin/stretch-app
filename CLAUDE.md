@@ -32,6 +32,8 @@ Mobile-first prayer PWA. Next.js App Router, TypeScript strict, Tailwind, Supaba
   a list get an AddLink for whoever can edit; Edit links name what they edit (Edit prayer, Edit altar, Edit thanksgiving).
 - Invites and members: reads in prayers/queries.ts, writes in prayers/mutations.ts. A screen Next keeps alive must
   clear its own state when hidden (effect cleanup) so coming back starts fresh.
+- Instructions: reads in src/features/instructions/queries.ts, writes in mutations.ts. A ritual belongs to its own
+  prayer or altar and ends with it; "Make this a ritual" never moves it elsewhere.
 - Screens inside the app are wrapped in ProfileGate (signed in and named). Read the signed-in
   person with useProfile() in client components or getCurrentProfile() on the server.
 - Phone first: design at 390px. Tap targets >= 44px, inputs >= 16px, scripture >= 18px,

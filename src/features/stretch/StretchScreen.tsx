@@ -11,6 +11,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { CheckInDialog } from "./CheckInDialog";
 import { PointSlider } from "./PointSlider";
 import { ScriptureSlider } from "./ScriptureSlider";
+import { PrayingInstructions } from "@/features/instructions/PrayingInstructions";
 import {
   activeSeconds,
   checkInRemainingMs,
@@ -33,11 +34,13 @@ type Props = {
   title: string;
   points: { id: string; body: string }[];
   scriptures: { id: string; reference: string; verseText: string; translation: string }[];
+  /** Rituals and instructions not yet done, shown while praying. */
+  instructions: { id: string; kind: "instruction" | "ritual"; body: string; frequency: string | null }[];
 };
 
 type Outcome = { kind: "saved" | "waiting" | "refused" | "short"; seconds: number };
 
-export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
+export function StretchScreen({ prayerId, title, points, scriptures, instructions }: Props) {
   const router = useRouter();
   const hydrated = useHydrated();
   const stretchRef = useRef<Stretch | null>(null);
@@ -252,6 +255,10 @@ export function StretchScreen({ prayerId, title, points, scriptures }: Props) {
 
       <div className="mt-5">
         <ScriptureSlider scriptures={scriptures} />
+      </div>
+
+      <div className="mt-5">
+        <PrayingInstructions prayerId={prayerId} initial={instructions} />
       </div>
 
       <div className="mt-6 flex flex-col gap-3 pb-6">

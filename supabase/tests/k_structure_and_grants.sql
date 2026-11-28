@@ -1,14 +1,14 @@
--- Structure: ten tables with RLS on, the seven app functions, indexes, triggers,
+-- Structure: eleven tables with RLS on, the seven app functions, indexes, triggers,
 -- and who may call what.
-select tests.expect_count($$select 1 from pg_tables where schemaname = 'public'$$, 10, 'the public schema has exactly ten tables');
+select tests.expect_count($$select 1 from pg_tables where schemaname = 'public'$$, 11, 'the public schema has exactly eleven tables');
 select tests.expect_value($$select string_agg(tablename, ',' order by tablename) from pg_tables where schemaname = 'public'$$,
-  'entries,prayer_invites,prayer_members,prayer_points,prayer_sessions,prayers,profiles,scriptures,thanksgiving_categories,thanksgivings', 'the ten tables are the expected ones');
+  'entries,prayer_instructions,prayer_invites,prayer_members,prayer_points,prayer_sessions,prayers,profiles,scriptures,thanksgiving_categories,thanksgivings', 'the eleven tables are the expected ones');
 select tests.expect_count($$select 1 from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in
   ('ping','create_or_reset_invite','join_prayer_by_code','complete_session','get_prayer_hours','get_my_hours','delete_my_account')$$, 7, 'the seven app functions exist');
 select tests.expect_count($$select 1 from pg_trigger t where t.tgrelid = 'auth.users'::regclass and t.tgname = 'on_auth_user_created' and not t.tgisinternal$$, 1, 'the trigger that creates a profile for each new auth user exists');
 select tests.expect_count($$select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity
-    and c.relname in ('profiles','prayers','prayer_members','prayer_invites','prayer_points','scriptures','prayer_sessions','entries','thanksgiving_categories','thanksgivings')$$, 10, 'RLS is enabled on all ten tables');
+    and c.relname in ('profiles','prayers','prayer_members','prayer_invites','prayer_points','scriptures','prayer_sessions','entries','thanksgiving_categories','thanksgivings','prayer_instructions')$$, 11, 'RLS is enabled on all eleven tables');
 select tests.expect_count($$select 1 from pg_tables t where schemaname = 'public'
   and not exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = t.tablename)$$, 0, 'every table has at least one policy');
 select tests.expect_count($$select 1 from pg_policies where schemaname = 'public' and roles <> '{authenticated}'$$, 0, 'every policy applies to signed-in users only');
@@ -16,9 +16,9 @@ select tests.expect_count($$select 1 from pg_indexes where schemaname = 'public'
   ('prayer_members_user_id_idx','prayer_sessions_prayer_id_idx','prayer_sessions_user_started_idx',
    'entries_prayer_created_idx','prayer_points_prayer_position_idx','scriptures_prayer_position_idx')$$, 6, 'the six named indexes exist');
 select tests.expect_count($$select 1 from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and t.tgname = 'set_updated_at' and not t.tgisinternal$$, 10, 'every table has the updated_at trigger');
+  where n.nspname = 'public' and t.tgname = 'set_updated_at' and not t.tgisinternal$$, 11, 'every table has the updated_at trigger');
 select tests.expect_count($$select 1 from information_schema.columns where table_schema = 'public'
-  and column_name in ('created_at','updated_at') and data_type = 'timestamp with time zone' and column_default = 'now()'$$, 20, 'every table has created_at and updated_at defaulting to now()');
+  and column_name in ('created_at','updated_at') and data_type = 'timestamp with time zone' and column_default = 'now()'$$, 22, 'every table has created_at and updated_at defaulting to now()');
 
 -- Signed-out visitors: no table access; only ping() and preview_invite() may be called.
 select tests.expect_count($$select 1 from pg_class c where c.relnamespace = 'public'::regnamespace and c.relkind = 'r'

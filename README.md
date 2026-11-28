@@ -288,3 +288,10 @@ The old Testimonies tab is now **Thanksgiving**: a place to record every answer 
 - **People praying:** every prayer page lists who is in it. The owner can remove someone; a member can leave. Hours prayed always stay with the person.
 - **Words:** "Start praying", "Begin", "End prayer time" and "Prayer time ended". The ended screen has **Pray again**, and coming back to the praying screen always starts fresh.
 - **Add:** small Add links beside Prayer points, Key scriptures, Answers to this prayer and on a thanksgiving category. Edit links say what they edit: Edit prayer, Edit altar, Edit thanksgiving.
+
+## Instructions and rituals
+
+- Every prayer and altar has an **Instructions** section, below Prayer points and Key scriptures. Write down what God said to do: an **instruction** (done once, ticked off) or a **ritual** (kept again and again, with how often).
+- **Make this a ritual** turns an instruction into a ritual on the same prayer or altar. A ritual lasts as long as its prayer: when the prayer ends or is archived, its rituals show "Ended with this prayer". An altar's carry on.
+- **While praying**, a card lists the rituals and the instructions not yet done, and **Write down an instruction** saves one without stopping the clock.
+- Private to whoever received it by default, with a switch to share with the people in that prayer. Members can write down their own. Table: `prayer_instructions`.

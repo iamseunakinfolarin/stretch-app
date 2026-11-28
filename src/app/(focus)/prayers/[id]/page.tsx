@@ -13,6 +13,8 @@ import { getCommitmentStatus, getInviteCode, getPrayer, listMembers } from "@/fe
 import { isArchived } from "@/features/prayers/types";
 import { ThanksgivingItem } from "@/features/thanksgiving/Bits";
 import { listThanksgivings } from "@/features/thanksgiving/queries";
+import { InstructionList } from "@/features/instructions/InstructionList";
+import { listInstructions } from "@/features/instructions/queries";
 import { getTimeZone } from "@/lib/time-zone";
 
 export const metadata: Metadata = { title: "Prayer" };
@@ -31,11 +33,14 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
   const shortfall = status ? formatShortfall(status.shortfallSeconds) : null;
   const together = prayer.memberCount > 1;
   const canAdd = prayer.isOwner && !archived;
-  const [answers, members, inviteCode] = await Promise.all([
+  const [answers, members, inviteCode, instructions] = await Promise.all([
     listThanksgivings({ prayerId: prayer.id }),
     listMembers(prayer.id),
     prayer.isOwner && !archived ? getInviteCode(prayer.id) : Promise.resolve(null),
+    listInstructions(prayer.id),
   ]);
+  // A prayer's rituals end with it: when it is archived or its end date has passed.
+  const ended = archived || Boolean(prayer.plannedEndDate && prayer.plannedEndDate < new Date().toISOString().slice(0, 10));
   const noun = prayer.kind === "altar" ? "altar" : "prayer";
   const me = members.find((m) => m.isMe);
 
@@ -149,6 +154,16 @@ export default async function PrayerPage({ params }: { params: Promise<{ id: str
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="instructions-heading" className="mt-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="instructions-heading" className="text-heading font-bold text-forest">
+            Instructions
+          </h2>
+          {!archived ? <AddLink href={`/prayers/${prayer.id}/instructions/new`} label="Write down an instruction" /> : null}
+        </div>
+        <InstructionList prayerId={prayer.id} items={instructions} ended={ended} canEdit={!archived} />
       </section>
 
       <section aria-labelledby="answers-heading" className="mt-8">
