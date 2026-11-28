@@ -53,6 +53,7 @@ The script is about 40 KB. It can be run in parts by passing file-name filters, 
 | `o_commitment.sql` | Altars cannot have a target; weekly commitments are 0.5 to 168 hours; `save_prayer` stores them and restarts the week count only when the commitment changes; `get_my_commitment_status` works out the shortfall (Sunday weeks, no carry-over, extra hours pay it down, the current week never counts) from the caller's own stretches only |
 | `p_thanksgiving.sql` | Categories are private to their owner; a thanksgiving is its author's and, when shared, readable only by people in its linked prayer; names, titles and bodies are checked; links only to a prayer the author is in and a category they own; deleting a category or prayer keeps the thanksgiving; signed-out visitors have no access |
 | `q_invite_preview.sql` | `preview_invite` shows a signed-in person with a valid code only the title, type, inviter's first name, whether it is archived and whether they are already in it; a wrong code shows nothing; the prayer itself stays hidden; signed-out visitors see the same preview and still cannot read prayers |
+| `r_instructions.sql` | Instructions and rituals are their author's; shared ones are readable only by people in that prayer; you write only on a prayer you are in; a ritual needs how often and is never done once; they go when the prayer goes; signed-out visitors have no access |
 
 ## Error codes the app can rely on
 

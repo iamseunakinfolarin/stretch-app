@@ -55,6 +55,64 @@ export type Database = {
           },
         ];
       };
+      prayer_instructions: {
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          done_on: string | null;
+          frequency: string | null;
+          id: string;
+          kind: string;
+          prayer_id: string;
+          received_on: string;
+          updated_at: string;
+          visibility: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          done_on?: string | null;
+          frequency?: string | null;
+          id?: string;
+          kind?: string;
+          prayer_id: string;
+          received_on?: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          done_on?: string | null;
+          frequency?: string | null;
+          id?: string;
+          kind?: string;
+          prayer_id?: string;
+          received_on?: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prayer_instructions_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "prayer_instructions_prayer_id_fkey";
+            columns: ["prayer_id"];
+            isOneToOne: false;
+            referencedRelation: "prayers";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       prayer_invites: {
         Row: {
           code: string;
